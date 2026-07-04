@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0E1116">
+<title>Ma vie</title>
+<style>
+  :root{--bg:#0E1116;--panel:#161B22;--panel-2:#1C2330;--line:#272E3A;--ink:#E8ECF1;--ink-soft:#9AA6B5;--ink-faint:#5E6877;--accent:#E11D2A;--accent-soft:#7d1318;--good:#5BB98C;--bad:#C9606A;--blue:#5B8DEF;--radius:14px;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5;padding:0 0 130px;max-width:560px;margin:0 auto;}
+  header{padding:24px 20px 12px;}
+  .hello{font-size:13px;color:var(--ink-faint);letter-spacing:.5px;text-transform:uppercase;}
+  h1{font-size:24px;margin:4px 0 2px;font-weight:700;}
+  .date{font-size:14px;color:var(--ink-soft);}
+  .tabs{display:flex;gap:4px;padding:6px 10px 0;position:sticky;top:0;background:linear-gradient(var(--bg),var(--bg) 70%,transparent);z-index:20;overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;padding:11px 14px;border-radius:10px 10px 0 0;font-size:13px;font-weight:600;color:var(--ink-faint);background:transparent;border:none;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .tab.active{color:var(--accent);background:var(--panel);}
+  .view{display:none;padding:16px 14px 0;}
+  .view.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .card-title{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;}
+  .priority{background:linear-gradient(135deg,var(--panel-2),var(--panel));border:1px solid var(--accent-soft);}
+  .priority .label{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);}
+  .priority .what{font-size:19px;font-weight:700;margin:6px 0 4px;}
+  .priority .why{font-size:13px;color:var(--ink-soft);}
+  .habit{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .habit:last-child{border-bottom:none;}
+  .check{width:30px;height:30px;border-radius:9px;border:2px solid var(--ink-faint);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;transition:.2s;}
+  .habit.done .check{background:var(--good);border-color:var(--good);color:#0E1116;transform:scale(1.05);}
+  .habit.done .h-name{color:var(--ink-soft);}
+  .h-name{font-size:16px;font-weight:600;}
+  .h-sub{font-size:12px;color:var(--ink-faint);}
+  .streak-wrap{display:flex;gap:12px;}
+  .streak-box{flex:1;text-align:center;padding:14px 6px;background:var(--panel-2);border-radius:12px;}
+  .streak-num{font-size:30px;font-weight:800;color:var(--accent);line-height:1;}
+  .streak-lab{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;margin-top:6px;}
+  textarea,input[type=text],input[type=number]{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:15px;padding:12px;font-family:inherit;}
+  textarea{resize:vertical;min-height:80px;}
+  textarea::placeholder,input::placeholder{color:var(--ink-faint);}
+  .mic-hint{font-size:12px;color:var(--ink-faint);margin:8px 2px 0;}
+  .fin-row{display:flex;gap:10px;margin-bottom:10px;}
+  .fin-field{flex:1;}
+  .fin-field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
+  .fin-field input{font-size:18px;font-weight:700;padding:11px 12px;}
+  .matelas{background:linear-gradient(135deg,var(--accent-soft),var(--panel-2));border:1px solid var(--accent-soft);text-align:center;padding:20px;}
+  .matelas .lab{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);}
+  .matelas .val{font-size:38px;font-weight:800;margin:4px 0;}
+  .matelas .cap{font-size:13px;color:var(--ink-soft);}
+  .progress-track{height:8px;background:var(--panel);border-radius:6px;margin-top:14px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--accent);border-radius:6px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+  .proj{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);}
+  .proj:last-child{border-bottom:none;}
+  .proj-name{font-size:15px;font-weight:600;}
+  .proj-status{font-size:13px;padding:4px 10px;border-radius:20px;background:var(--panel-2);color:var(--ink-soft);cursor:pointer;transition:.2s;}
+  button.save{width:100%;background:var(--accent);color:#0E1116;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;transition:transform .1s;}
+  button.save:active{transform:scale(.98);opacity:.9;}
+  button.ghost{width:100%;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;}
+  .saved-flash{text-align:center;color:var(--good);font-size:14px;height:20px;margin-top:8px;transition:.2s;}
+  .month-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .month-nav button{background:var(--panel);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;}
+  .month-label{font-size:17px;font-weight:700;}
+  .cap-note{font-size:12px;color:var(--ink-faint);text-align:center;padding:10px 20px 0;line-height:1.5;}
+  .rule-box{background:var(--panel-2);border-left:3px solid var(--accent);padding:10px 12px;border-radius:8px;font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+  .biz-entry{background:var(--panel-2);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--line);}
+  .biz-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .biz-name{font-weight:700;font-size:15px;}
+  .biz-amt{font-weight:800;font-size:15px;}.biz-amt.pos{color:var(--good);}.biz-amt.neg{color:var(--bad);}
+  .biz-date{font-size:11px;color:var(--ink-faint);}
+  .biz-note{font-size:14px;color:var(--ink);margin-top:4px;}
+  .biz-total{display:flex;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px;}
+  .biz-total:last-child{border-bottom:none;}
+  .del{color:var(--ink-faint);font-size:12px;cursor:pointer;}
+  select{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:15px;padding:12px;font-family:inherit;}
+  .empty{color:var(--ink-faint);font-size:14px;text-align:center;padding:14px;}
+  .body-stats{display:flex;gap:10px;}
+  .stat-field{flex:1;}
+  .stat-field label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+  .stat-field input{font-size:20px;font-weight:800;text-align:center;padding:12px 6px;}
+  /* CORPS 3D MAP */
+  .bodywrap{display:flex;flex-direction:column;align-items:center;}
+  .body-toggle{display:flex;gap:8px;margin-bottom:10px;}
+  .body-toggle button{background:var(--panel-2);border:1px solid var(--line);color:var(--ink-soft);padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;}
+  .body-toggle button.on{background:var(--accent);color:#0E1116;border-color:var(--accent);}
+  svg.bodysvg{width:200px;height:430px;filter:drop-shadow(0 12px 24px rgba(0,0,0,.5));}
+  .mzone{fill:#2A3340;stroke:#3a4654;stroke-width:1.5;cursor:pointer;transition:fill .3s,filter .3s;}
+  .mzone:hover{fill:#384556;}
+  .mzone.sel{fill:var(--accent);stroke:var(--accent);filter:drop-shadow(0 0 10px rgba(225,29,42,.8));animation:glow 1.6s ease-in-out infinite;}
+  @keyframes glow{0%,100%{filter:drop-shadow(0 0 6px rgba(225,29,42,.6));}50%{filter:drop-shadow(0 0 14px rgba(225,29,42,1));}}
+  .bodybase{fill:#1a212c;stroke:#272E3A;stroke-width:1.5;}
+  .mlabel{text-align:center;font-size:14px;color:var(--accent);font-weight:700;margin:6px 0 12px;min-height:20px;letter-spacing:.3px;}
+  .grp-title{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin:0 0 4px;}
+  .exo{padding:12px 2px;border-bottom:1px solid var(--line);animation:fade .25s ease;}
+  .exo:last-child{border-bottom:none;}
+  .exo-top{display:flex;align-items:center;gap:12px;}
+  .exo-add{width:28px;height:28px;border-radius:8px;border:2px solid var(--ink-faint);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:.2s;}
+  .exo.sel .exo-add{background:var(--accent);border-color:var(--accent);color:#0E1116;transform:scale(1.08);}
+  .exo-name{flex:1;font-size:15px;font-weight:600;cursor:pointer;}
+  .exo-info{font-size:13px;color:var(--ink-faint);cursor:pointer;padding:2px 6px;}
+  .exo-detail{max-height:0;overflow:hidden;transition:max-height .35s ease;margin-top:0;}
+  .exo.show-detail .exo-detail{max-height:400px;margin-top:10px;}
+  .exo-detail-in{padding:10px 12px;background:var(--panel-2);border-radius:10px;font-size:13px;color:var(--ink-soft);}
+  .exo-detail b{color:var(--ink);}
+  .tag{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:2px 9px;font-size:11px;margin:3px 4px 0 0;color:var(--ink-soft);}
+  .seance-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;background:var(--panel);border-top:1px solid var(--line);padding:12px 14px;z-index:30;animation:slideup .3s ease;}
+  @keyframes slideup{from{transform:translate(-50%,100%);}to{transform:translate(-50%,0);}}
+  .seance-count{font-size:13px;color:var(--ink-soft);margin-bottom:8px;}
+  .seance-count b{color:var(--accent);}
+  .sess-item{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--line);font-size:14px;}
+  .sess-item:last-child{border-bottom:none;}
+  .sess-x{color:var(--ink-faint);cursor:pointer;}
+  .sess-log{background:var(--panel-2);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--line);}
+  .sess-log .d{font-size:12px;color:var(--ink-faint);margin-bottom:4px;}
+  /* NUTRITION */
+  .nut-result{display:flex;gap:10px;text-align:center;margin-bottom:12px;}
+  .nut-box{flex:1;background:var(--panel-2);border-radius:12px;padding:14px 6px;}
+  .nut-num{font-size:24px;font-weight:800;color:var(--accent);line-height:1;}
+  .nut-lab{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;margin-top:6px;}
+  .goal-pick{display:flex;gap:6px;margin:12px 0;}
+  .goal-pick button{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-soft);padding:10px 4px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;}
+  .goal-pick button.on{background:var(--accent);color:#0E1116;border-color:var(--accent);}
+  .macro{display:flex;justify-content:space-between;padding:11px 2px;border-bottom:1px solid var(--line);font-size:15px;}
+  .macro:last-child{border-bottom:none;}
+  .macro b{color:var(--accent);}
+  .big-cal{text-align:center;font-size:40px;font-weight:800;color:var(--accent);margin:4px 0;}
+  .big-cal-lab{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+  /* CHARGES */
+  .charge-sum{background:linear-gradient(135deg,var(--accent-soft),var(--panel-2));border:1px solid var(--accent-soft);text-align:center;padding:18px;}
+  .charge-sum.done{background:linear-gradient(135deg,#1d5e42,var(--panel-2));border-color:var(--good);}
+  .charge-sum .lab{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);}
+  .charge-sum.done .lab{color:var(--good);}
+  .charge-sum .pct{font-size:34px;font-weight:800;margin:2px 0;}
+  .charge-line{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin-top:4px;}
+  .charge-line b{color:var(--ink);}
+  .charge-item{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);}
+  .charge-item:last-child{border-bottom:none;}
+  .charge-check{width:28px;height:28px;border-radius:8px;border:2px solid var(--ink-faint);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.2s;}
+  .charge-item.paid .charge-check{background:var(--good);border-color:var(--good);color:#0E1116;animation:popCheck .3s ease;}
+  @keyframes popCheck{0%{transform:scale(.5);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+  .charge-info{flex:1;min-width:0;}
+  .charge-name{font-size:15px;font-weight:600;}
+  .charge-item.paid .charge-name{color:var(--ink-soft);text-decoration:line-through;}
+  .charge-amt{font-size:15px;font-weight:700;color:var(--ink);flex-shrink:0;}
+  .charge-del{color:var(--ink-faint);font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;}
+  .charge-add-row{display:flex;gap:8px;margin-top:4px;}
+  .charge-add-row input[type=text]{flex:2;}
+  .charge-add-row input[type=number]{flex:1;}
+  .hist-month{background:var(--panel-2);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--line);}
+  .hist-head{display:flex;justify-content:space-between;align-items:center;}
+  .hist-name{font-weight:700;font-size:15px;}
+  .hist-badge{font-size:13px;}
+  .hist-detail{font-size:13px;color:var(--ink-soft);margin-top:8px;}
+  .hist-unpaid{color:var(--bad);}
+  /* JOURNAL */
+  .jour-day{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin:14px 0 6px;font-weight:700;}
+  .jour-day:first-child{margin-top:0;}
+  .jour-entry{background:var(--panel-2);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);animation:fade .25s ease;}
+  .jour-time{font-size:11px;color:var(--ink-faint);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;}
+  .jour-time .del{cursor:pointer;}
+  .jour-body{font-size:14px;color:var(--ink);white-space:pre-wrap;line-height:1.5;}
+  /* MODAL EDITION */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .2s ease;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;width:100%;max-width:380px;}
+  .modal h3{margin:0 0 16px;font-size:18px;}
+  .modal label{display:block;font-size:12px;color:var(--ink-soft);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.4px;}
+  .modal input[type=range]{width:100%;accent-color:var(--accent);height:30px;}
+  .modal .amt-big{text-align:center;font-size:28px;font-weight:800;color:var(--accent);margin:4px 0;}
+  .modal-btns{display:flex;gap:8px;margin-top:18px;}
+  .modal-btns button{flex:1;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;}
+  .mb-save{background:var(--accent);color:#0E1116;}
+  .mb-del{background:transparent;color:var(--bad);border:1px solid var(--bad)!important;}
+  .mb-cancel{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)!important;}
+  /* PRINT / PDF */
+  #printArea{display:none;}
+  @media print{
+    body{padding:0;max-width:none;}
+    body * {visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:24px;color:#111;background:#fff;}
+    #printArea h2{color:#E11D2A;margin:0 0 4px;}
+    #printArea .pa-sub{color:#555;margin:0 0 18px;font-size:14px;}
+    #printArea .pa-bar{height:14px;background:#eee;border-radius:8px;overflow:hidden;margin:10px 0 18px;}
+    #printArea .pa-fill{height:100%;background:#E11D2A;}
+    #printArea table{width:100%;border-collapse:collapse;font-size:14px;}
+    #printArea th,#printArea td{text-align:left;padding:8px 6px;border-bottom:1px solid #ddd;}
+    #printArea td.r{text-align:right;}
+    #printArea .ok{color:#1a8a55;font-weight:700;}
+    #printArea .no{color:#c0392b;font-weight:700;}
+  }
+</style>
+</head>
+<body>
+<header><div class="hello">Reprendre le contrôle</div><h1>Ma vie</h1><div class="date" id="todayDate"></div></header>
+<div class="tabs">
+  <button class="tab active" data-view="jour">Aujourd'hui</button>
+  <button class="tab" data-view="journal">Journal</button>
+  <button class="tab" data-view="corps">Corps</button>
+  <button class="tab" data-view="nutri">Nutrition</button>
+  <button class="tab" data-view="mois">Le mois</button>
+  <button class="tab" data-view="charges">Charges</button>
+  <button class="tab" data-view="biz">Business</button>
+  <button class="tab" data-view="cap">Le cap</button>
+</div>
+
+<!-- AUJOURD'HUI -->
+<section class="view active" id="jour">
+  <div class="card priority"><div class="label">Priorité active</div><div class="what">Tenir mon corps</div><div class="why">Stop clope au boulot + sport. C'est la fondation. On n'ouvre rien d'autre tant que ce n'est pas tenu.</div></div>
+  <div class="card"><p class="card-title">Mes habitudes du jour</p><div id="habits"></div></div>
+  <div class="card"><p class="card-title">Ma série</p><div class="streak-wrap">
+    <div class="streak-box"><div class="streak-num" id="streakClope">0</div><div class="streak-lab">jours sans clope</div></div>
+    <div class="streak-box"><div class="streak-num" id="streakSport">0</div><div class="streak-lab">jours sport</div></div></div></div>
+  <div class="card"><p class="card-title">Mon ressenti aujourd'hui</p>
+    <textarea id="ressenti" placeholder="Comment tu te sens ? Pourquoi tu as tenu — ou pas ? Parle..."></textarea>
+    <p class="mic-hint">Astuce : appuie sur le micro de ton clavier et parle, ça transcrit.</p>
+    <button class="save" onclick="saveDay()">Valider ma journée</button><div class="saved-flash" id="dayFlash"></div></div>
+</section>
+
+<!-- JOURNAL -->
+<section class="view" id="journal">
+  <div class="card">
+    <p class="card-title">Vider mon sac</p>
+    <p class="mic-hint" style="margin:0 0 10px;">Parle librement : récap de ta journée, ce que tu ressens, ce qui pèse ou ce qui va bien. C'est ton espace, personne ne juge.</p>
+    <textarea id="journalText" placeholder="Appuie sur le micro de ton clavier et parle..." style="min-height:120px;"></textarea>
+    <p class="mic-hint">Astuce : le micro de ton clavier transcrit ta voix en texte.</p>
+    <button class="save" onclick="saveJournal()">Enregistrer cette entrée</button>
+    <div class="saved-flash" id="journalFlash"></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Mon journal</p>
+    <div id="journalList"><div class="empty">Aucune entrée pour l'instant.</div></div>
+  </div>
+</section>
+
+<!-- CORPS -->
+<section class="view" id="corps">
+  <div class="card"><p class="card-title">Mon corps</p>
+    <div class="body-stats" style="margin-bottom:12px;">
+      <div class="stat-field"><label>Départ (kg)</label><input type="number" inputmode="decimal" id="bDepart" placeholder="--"></div>
+      <div class="stat-field"><label>Actuel (kg)</label><input type="number" inputmode="decimal" id="bActuel" placeholder="--"></div>
+      <div class="stat-field"><label>Objectif (kg)</label><input type="number" inputmode="decimal" id="bObjectif" placeholder="--"></div></div>
+    <div class="body-stats" style="margin-bottom:12px;">
+      <div class="stat-field"><label>Taille (cm)</label><input type="number" inputmode="decimal" id="bTaille" placeholder="--"></div>
+      <div class="stat-field"><label>Tour de bras</label><input type="number" inputmode="decimal" id="bBras" placeholder="--"></div>
+      <div class="stat-field"><label>Tour de taille</label><input type="number" inputmode="decimal" id="bVentre" placeholder="--"></div></div>
+    <div class="body-stats" style="margin-bottom:12px;">
+      <div class="stat-field"><label>Masse grasse (%)</label><input type="number" inputmode="decimal" id="bMg" placeholder="--"></div>
+      <div class="stat-field" style="flex:2;justify-content:flex-end;display:flex;align-items:center;"><span style="font-size:12px;color:var(--ink-soft);">Objectif : 12–15 % — physique athlétique</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="bodyFill" style="width:0%"></div></div>
+    <p class="mic-hint" id="bodyMsg">Renseigne tes chiffres pour suivre ta progression.</p>
+    <button class="save" onclick="saveBody()" style="margin-top:10px;">Enregistrer mes mesures</button><div class="saved-flash" id="bodyFlash"></div></div>
+
+  <div class="card"><p class="card-title">Touche un muscle</p>
+    <div class="bodywrap">
+      <div class="body-toggle"><button id="btFront" class="on" onclick="setSide('front')">Face avant</button><button id="btBack" onclick="setSide('back')">Face arrière</button><button onclick="selectMuscle('Cardio')">Cardio</button></div>
+      <div id="bodySvgHost"></div>
+      <div class="mlabel" id="muscleLabel">Touche une zone du corps pour voir les exercices</div>
+    </div>
+    <div id="exoLib"></div>
+    <div style="margin-top:12px;">
+      <input type="text" id="customExo" placeholder="Ajouter mon propre exercice..." style="margin-bottom:8px;">
+      <button class="ghost" onclick="addCustomExo()">+ Créer cet exercice</button></div>
+  </div>
+
+  <div class="card"><p class="card-title">Historique de mes séances</p><div id="sessLog"><div class="empty">Aucune séance validée pour l'instant.</div></div></div>
+</section>
+
+<div class="seance-bar" id="seanceBar" style="display:none;">
+  <div class="seance-count">Ma séance : <b id="seanceN">0</b> exercice(s)</div>
+  <div id="seanceList"></div>
+  <button class="save" onclick="validateSeance()" style="margin-top:8px;">Valider ma séance</button>
+  <div class="saved-flash" id="seanceFlash"></div>
+</div>
+
+<!-- NUTRITION -->
+<section class="view" id="nutri">
+  <div class="card"><p class="card-title">Mes données</p>
+    <div class="body-stats" style="margin-bottom:12px;">
+      <div class="stat-field"><label>Poids (kg)</label><input type="number" inputmode="decimal" id="nPoids" placeholder="--" oninput="calcNut()"></div>
+      <div class="stat-field"><label>Taille (cm)</label><input type="number" inputmode="decimal" id="nTaille" placeholder="--" oninput="calcNut()"></div>
+      <div class="stat-field"><label>Âge</label><input type="number" inputmode="decimal" id="nAge" placeholder="--" oninput="calcNut()"></div></div>
+    <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;">Niveau d'activité</label>
+    <select id="nAct" onchange="calcNut()">
+      <option value="1.2">Sédentaire (peu de mouvement)</option>
+      <option value="1.375">Léger (sport 1-2x/sem)</option>
+      <option value="1.55">Modéré (sport 3-4x/sem)</option>
+      <option value="1.725" selected>Actif (boulot physique + sport)</option>
+      <option value="1.9">Très actif (athlète)</option>
+    </select>
+  </div>
+  <div class="card"><p class="card-title">Mon métabolisme</p>
+    <div class="nut-result">
+      <div class="nut-box"><div class="nut-num" id="nBmr">--</div><div class="nut-lab">Métabolisme de base</div></div>
+      <div class="nut-box"><div class="nut-num" id="nTdee">--</div><div class="nut-lab">Dépense totale / jour</div></div>
+    </div>
+    <p class="mic-hint" style="margin:0;">Le métabolisme de base = ce que ton corps brûle au repos. La dépense totale inclut ton activité.</p>
+  </div>
+  <div class="card"><p class="card-title">Mon objectif</p>
+    <div class="goal-pick">
+      <button data-goal="cut" onclick="setGoal('cut')">Perdre du gras</button>
+      <button data-goal="maint" class="on" onclick="setGoal('maint')">Maintien</button>
+      <button data-goal="bulk" onclick="setGoal('bulk')">Prendre du muscle</button>
+    </div>
+    <div class="big-cal" id="nGoalCal">--</div>
+    <div class="big-cal-lab" id="nGoalLab">calories par jour</div>
+    <div class="macro"><span>Protéines</span><b id="nProt">--</b></div>
+    <div class="macro"><span>Lipides (gras)</span><b id="nFat">--</b></div>
+    <div class="macro"><span>Glucides</span><b id="nCarb">--</b></div>
+  </div>
+  <div class="card" id="nutAdvice"><p class="card-title">Comment t'y prendre</p><div id="nutAdviceTxt" style="font-size:14px;color:var(--ink-soft);"></div></div>
+</section>
+
+<!-- LE MOIS -->
+<section class="view" id="mois">
+  <div class="month-nav"><button onclick="changeMonth(-1)">‹</button><span class="month-label" id="monthLabel"></span><button onclick="changeMonth(1)">›</button></div>
+  <div class="card matelas"><div class="lab">Matelas de sécurité</div><div class="val" id="matelasVal">0 €</div><div class="cap">Cap 5 ans : la brique du jour, pas le château.</div><div class="progress-track"><div class="progress-fill" id="matelasFill" style="width:0%"></div></div></div>
+  <div class="card"><p class="card-title">Ce mois-ci</p>
+    <div class="fin-row">
+      <div class="fin-field"><label>Mis de côté (€)</label><input type="number" inputmode="decimal" id="finEpargne" placeholder="0"></div>
+      <div class="fin-field"><label>Dépenses notables (€)</label><input type="number" inputmode="decimal" id="finDepenses" placeholder="0"></div></div>
+    <div class="fin-field"><label>Note finance du mois</label><textarea id="finNote" placeholder="Qu'est-ce que j'ai fait de ma finance ce mois-ci ? Parle..."></textarea></div></div>
+  <div class="card"><p class="card-title">Mes gros dossiers</p>
+    <div class="proj"><span class="proj-name">Prêt voiture</span><span class="proj-status" data-proj="voiture" onclick="cycleStatus(this)">À faire</span></div>
+    <div class="proj"><span class="proj-name">PURO (studio Pilates)</span><span class="proj-status" data-proj="puro" onclick="cycleStatus(this)">À faire</span></div></div>
+  <button class="save" onclick="saveMonth()">Enregistrer le mois</button><div class="saved-flash" id="monthFlash"></div>
+</section>
+
+<!-- CHARGES -->
+<section class="view" id="charges">
+  <div class="card charge-sum" id="chargeSum">
+    <div class="lab" id="chargeMonthLabel">Charges du mois</div>
+    <div class="pct" id="chargePct">0%</div>
+    <div class="charge-line"><span>Payé : <b id="chargePaid">0 €</b></span><span>Total : <b id="chargeTotal">0 €</b></span></div>
+    <div class="charge-line" style="justify-content:center;margin-top:6px;">Reste à payer : <b id="chargeRest" style="margin-left:6px;">0 €</b></div>
+    <div class="progress-track"><div class="progress-fill" id="chargeFill" style="width:0%"></div></div>
+  </div>
+  <button class="ghost" onclick="exportChargesPDF()" style="margin-bottom:14px;">📄 Exporter le bilan en PDF</button>
+  <div class="card">
+    <p class="card-title">Mes charges</p>
+    <div id="chargeList"></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Ajouter une charge</p>
+    <div class="charge-add-row">
+      <input type="text" id="newChargeName" placeholder="Nom (ex : Assurance)">
+      <input type="number" inputmode="decimal" id="newChargeAmt" placeholder="€">
+    </div>
+    <button class="save" onclick="addCharge()" style="margin-top:10px;">+ Ajouter</button>
+    <div class="saved-flash" id="chargeFlash"></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Historique des mois</p>
+    <div id="chargeHist"><div class="empty">Aucun mois archivé pour l'instant.</div></div>
+  </div>
+</section>
+
+<!-- BUSINESS -->
+<section class="view" id="biz">
+  <div class="rule-box"><b>Règle :</b> ici tu notes ce qui s'est <b>passé</b>, jamais ce que tu prévois. Un résultat réel, pas une idée.</div>
+  <div class="card"><p class="card-title">Ajouter ce qui s'est passé</p>
+    <div class="fin-field" style="margin-bottom:10px;"><label>Quel business / activité</label><input type="text" id="bizName" placeholder="PLR Web, PURO, freelance..." list="bizList"><datalist id="bizList"></datalist></div>
+    <div class="fin-field" style="margin-bottom:10px;"><label>Montant (€) — négatif si dépense</label><input type="number" inputmode="decimal" id="bizAmt" placeholder="ex : 150 ou -40"></div>
+    <div class="fin-field" style="margin-bottom:12px;"><label>Qu'est-ce qui s'est passé ? Pourquoi ?</label><textarea id="bizNote" placeholder="Parle : ce qui a marché, ce qui a foiré, pourquoi..."></textarea></div>
+    <button class="save" onclick="addBiz()">Enregistrer l'entrée</button><div class="saved-flash" id="bizFlash"></div></div>
+  <div class="card"><p class="card-title">Bilan par business</p><div id="bizTotals"><div class="empty">Rien encore.</div></div></div>
+  <div class="card"><p class="card-title">Historique</p><div id="bizLog"></div></div>
+</section>
+
+<!-- LE CAP -->
+<section class="view" id="cap">
+  <div class="card priority"><div class="label">Mon cap</div><div class="what">Cap 30 → 40</div><div class="why">Une meilleure version de moi. Solide financièrement. Sorti du boulot physique avant que le corps casse.</div></div>
+  <div class="card"><p class="card-title">Mes 4 zones</p>
+    <div class="proj"><span class="proj-name">Corps</span><span class="proj-status" style="cursor:default;color:var(--accent)">Active</span></div>
+    <div class="proj"><span class="proj-name">Sortie Lidl / business</span><span class="proj-status" style="cursor:default">En attente</span></div>
+    <div class="proj"><span class="proj-name">Finance + trading</span><span class="proj-status" style="cursor:default">En attente</span></div>
+    <div class="proj"><span class="proj-name">Mental</span><span class="proj-status" style="cursor:default">En continu</span></div></div>
+  <p class="cap-note">Règle d'or : <b>une seule zone active à la fois.</b><br>Le trading et les business attendent leur tour : ils sont notés, ils ne disparaissent pas.<br>Voir ta série monter, c'est ça qui te porte.</p>
+
+  <div class="card">
+    <p class="card-title">Ma mission</p>
+    <p style="font-size:14px;color:var(--ink-soft);margin:0;line-height:1.6;">
+      Construire un patrimoine durable et plusieurs entreprises rentables. Devenir libre financièrement.
+      Être un excellent mari et père. Rester en excellente santé. <b style="color:var(--ink);">Sortir du travail
+      physique avant que le corps casse.</b>
+    </p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Mes valeurs</p>
+    <div>
+      <span class="tag">Famille</span><span class="tag">Foi</span><span class="tag">Liberté</span>
+      <span class="tag">Discipline</span><span class="tag">Excellence</span><span class="tag">Transmission</span>
+      <span class="tag">Intégrité</span><span class="tag">Apprentissage</span>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL EDITION CHARGE -->
+<div class="modal-overlay" id="chargeModal" style="display:none;">
+  <div class="modal">
+    <h3 id="modalTitle">Modifier la charge</h3>
+    <label>Nom</label>
+    <input type="text" id="modalName" placeholder="Nom de la charge">
+    <label>Montant</label>
+    <div class="amt-big" id="modalAmtBig">0 €</div>
+    <input type="range" id="modalSlider" min="0" max="1000" step="1" value="0" oninput="modalSliderInput()">
+    <input type="number" inputmode="decimal" id="modalAmt" placeholder="Saisir le montant" oninput="modalAmtInput()" style="margin-top:8px;">
+    <div class="modal-btns">
+      <button class="mb-save" onclick="saveChargeModal()">Enregistrer</button>
+      <button class="mb-del" onclick="deleteChargeModal()">Supprimer</button>
+    </div>
+    <div class="modal-btns" style="margin-top:8px;">
+      <button class="mb-cancel" onclick="closeChargeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE IMPRESSION PDF -->
+<div id="printArea"></div>
+
+<script>
+const EXOS=[
+ {g:"Pectoraux",l:[
+  {n:"Développé couché",m:["Pectoraux","Triceps","Épaules avant"],w:"L'exercice roi du haut du corps. Force et masse pectorale.",t:"Descends la barre au niveau des tétons, coudes ~45°. Ne rebondis pas."},
+  {n:"Développé incliné haltères",m:["Haut des pectoraux"],w:"Cible le haut des pecs, souvent en retard.",t:"Banc à 30°. Haltères pour plus d'amplitude."},
+  {n:"Écarté haltères",m:["Pectoraux"],w:"Isole le pec en étirement, travaille la largeur.",t:"Coudes légèrement fléchis, mouvement de 'câlin'. Léger."},
+  {n:"Pompes",m:["Pectoraux","Triceps","Gainage"],w:"Zéro matériel, parfait à la maison.",t:"Corps gainé, descends jusqu'à frôler le sol."},
+  {n:"Dips",m:["Bas des pectoraux","Triceps"],w:"Excellent bas des pecs et triceps.",t:"Penche le buste en avant pour les pecs."},
+ ]},
+ {g:"Dos",l:[
+  {n:"Soulevé de terre",m:["Dos","Lombaires","Fessiers","Ischios"],w:"L'exercice le plus complet qui existe. Force globale.",t:"Dos PLAT, jamais arrondi. Pousse dans le sol. Barre près du corps."},
+  {n:"Tractions",m:["Grand dorsal","Biceps"],w:"Le meilleur pour la largeur du dos (effet V).",t:"Si trop dur, élastique. Menton au-dessus de la barre."},
+  {n:"Rowing barre",m:["Dos","Trapèzes","Biceps"],w:"Construit l'épaisseur du dos.",t:"Buste ~45°, tire vers le nombril. Serre les omoplates."},
+  {n:"Tirage vertical",m:["Grand dorsal"],w:"Alternative aux tractions, charge réglable.",t:"Tire vers le haut de la poitrine, pas derrière la nuque."},
+  {n:"Tirage horizontal",m:["Dos","Trapèzes"],w:"Épaisseur du dos en sécurité.",t:"Buste fixe, ne te balance pas."},
+  {n:"Shrugs",m:["Trapèzes"],w:"Cible les trapèzes, silhouette massive.",t:"Hausse les épaules vers les oreilles. Pause en haut."},
+ ]},
+ {g:"Jambes",l:[
+  {n:"Squat",m:["Quadriceps","Fessiers","Ischios"],w:"Le roi du bas du corps. Booste tout le métabolisme.",t:"Hanches sous les genoux. Genoux dans l'axe, dos droit."},
+  {n:"Presse à cuisses",m:["Quadriceps","Fessiers"],w:"Charge lourd sans risque pour le dos.",t:"Ne décolle pas les fesses du siège."},
+  {n:"Fentes",m:["Quadriceps","Fessiers"],w:"Corrige les déséquilibres, très fonctionnel.",t:"Grand pas, genou au-dessus de la cheville."},
+  {n:"Soulevé de terre roumain",m:["Ischios","Fessiers"],w:"Cible l'arrière des cuisses et fessiers.",t:"Jambes quasi tendues, pousse les fesses en arrière."},
+  {n:"Leg curl",m:["Ischios"],w:"Isole l'arrière de cuisse, protège le genou.",t:"Contrôle la descente."},
+  {n:"Mollets debout",m:["Mollets"],w:"Les mollets demandent un travail direct et fréquent.",t:"Amplitude complète, pause 1s en haut."},
+  {n:"Hip thrust",m:["Fessiers","Ischios"],w:"Le meilleur pour les fessiers et la puissance des hanches.",t:"Dos sur banc, pousse les hanches au ciel."},
+ ]},
+ {g:"Épaules",l:[
+  {n:"Développé militaire",m:["Épaules","Triceps"],w:"Construit des épaules larges et solides.",t:"Gaine les abdos, ne cambre pas."},
+  {n:"Élévations latérales",m:["Deltoïde latéral"],w:"Donne la largeur (effet carré).",t:"Léger, monte à l'horizontale, pas plus haut."},
+  {n:"Oiseau",m:["Deltoïde postérieur"],w:"Arrière de l'épaule, améliore la posture.",t:"Buste penché, écarte les bras. Très léger."},
+  {n:"Rowing menton",m:["Épaules","Trapèzes"],w:"Combine épaules et trapèzes.",t:"Tire sous le menton, coudes hauts."},
+ ]},
+ {g:"Bras",l:[
+  {n:"Curl barre",m:["Biceps"],w:"Le classique pour des biceps volumineux.",t:"Coudes collés au corps, ne balance pas."},
+  {n:"Curl haltères",m:["Biceps"],w:"Chaque bras indépendamment, meilleur pic.",t:"Tourne le poignet vers l'extérieur en montant."},
+  {n:"Curl marteau",m:["Biceps","Avant-bras"],w:"Épaissit le bras et l'avant-bras.",t:"Paumes face à face. Coudes fixes."},
+  {n:"Barre au front",m:["Triceps"],w:"Masse des triceps (2/3 du volume du bras).",t:"Coudes fixes vers le plafond."},
+  {n:"Extension poulie",m:["Triceps"],w:"Tension constante, en sécurité.",t:"Coudes collés, tends complètement vers le bas."},
+ ]},
+ {g:"Abdos & Gainage",l:[
+  {n:"Gainage (planche)",m:["Abdos profonds","Lombaires"],w:"Renforce le centre, protège ton dos — crucial pour ton métier.",t:"Corps en ligne droite, ne creuse pas. 30s à 1min."},
+  {n:"Crunch",m:["Grand droit"],w:"Cible la partie visible des abdos.",t:"Décolle juste les épaules, ne tire pas sur la nuque."},
+  {n:"Relevé de jambes",m:["Bas des abdos"],w:"Travaille le bas des abdos.",t:"Dos plaqué, descends lentement sans cambrer."},
+  {n:"Russian twist",m:["Obliques"],w:"Travaille les côtés et la rotation du tronc.",t:"Buste incliné, tourne d'un côté à l'autre."},
+ ]},
+ {g:"Cardio",l:[
+  {n:"Rameur",m:["Cardio","Dos","Jambes"],w:"Ton échauffement préféré. Cardio complet, doux pour les articulations.",t:"5-10 min. Pousse avec les jambes d'abord, puis tire."},
+  {n:"Corde à sauter",m:["Cardio","Mollets"],w:"Brûle beaucoup vite, améliore la coordination.",t:"Petits sauts, poignets souples. Séries de 30s."},
+  {n:"Vélo / Course",m:["Cardio","Jambes"],w:"Relance ton cardio mis à mal par la clope.",t:"Intensité où parler est difficile. 20-30 min."},
+ ]},
+];
+const GROUP_LABELS={"Pectoraux":"Pectoraux","Dos":"Dos","Jambes":"Jambes","Épaules":"Épaules","Bras":"Bras","Abdos & Gainage":"Abdos & Gainage","Cardio":"Cardio"};
+
+// SVG corps (face avant / arrière), zones cliquables
+const SVG_FRONT=`<svg class="bodysvg" viewBox="0 0 200 430">
+<ellipse class="bodybase" cx="100" cy="34" rx="20" ry="23"/>
+<rect class="bodybase" x="92" y="54" width="16" height="14" rx="5"/>
+<path class="bodybase" d="M60 78 Q100 70 140 78 L150 150 Q150 175 140 195 L60 195 Q50 175 50 150 Z"/>
+<rect class="bodybase" x="40" y="120" width="20" height="80" rx="10"/>
+<rect class="bodybase" x="140" y="120" width="20" height="80" rx="10"/>
+<rect class="bodybase" x="68" y="200" width="28" height="120" rx="13"/>
+<rect class="bodybase" x="104" y="200" width="28" height="120" rx="13"/>
+<rect class="bodybase" x="70" y="322" width="24" height="90" rx="11"/>
+<rect class="bodybase" x="106" y="322" width="24" height="90" rx="11"/>
+<ellipse class="mzone" data-g="Épaules" cx="58" cy="88" rx="16" ry="13"/>
+<ellipse class="mzone" data-g="Épaules" cx="142" cy="88" rx="16" ry="13"/>
+<path class="mzone" data-g="Pectoraux" d="M70 96 Q85 92 98 96 L98 122 Q84 128 70 122 Z"/>
+<path class="mzone" data-g="Pectoraux" d="M102 96 Q115 92 130 96 L130 122 Q116 128 102 122 Z"/>
+<rect class="mzone" data-g="Bras" x="41" y="118" width="18" height="46" rx="9"/>
+<rect class="mzone" data-g="Bras" x="141" y="118" width="18" height="46" rx="9"/>
+<rect class="mzone" data-g="Abdos & Gainage" x="80" y="128" width="40" height="62" rx="10"/>
+<rect class="mzone" data-g="Jambes" x="69" y="205" width="26" height="100" rx="12"/>
+<rect class="mzone" data-g="Jambes" x="105" y="205" width="26" height="100" rx="12"/>
+</svg>`;
+const SVG_BACK=`<svg class="bodysvg" viewBox="0 0 200 430">
+<ellipse class="bodybase" cx="100" cy="34" rx="20" ry="23"/>
+<rect class="bodybase" x="92" y="54" width="16" height="14" rx="5"/>
+<path class="bodybase" d="M60 78 Q100 70 140 78 L150 150 Q150 175 140 195 L60 195 Q50 175 50 150 Z"/>
+<rect class="bodybase" x="40" y="120" width="20" height="80" rx="10"/>
+<rect class="bodybase" x="140" y="120" width="20" height="80" rx="10"/>
+<rect class="bodybase" x="68" y="200" width="28" height="120" rx="13"/>
+<rect class="bodybase" x="104" y="200" width="28" height="120" rx="13"/>
+<rect class="bodybase" x="70" y="322" width="24" height="90" rx="11"/>
+<rect class="bodybase" x="106" y="322" width="24" height="90" rx="11"/>
+<ellipse class="mzone" data-g="Épaules" cx="60" cy="88" rx="15" ry="12"/>
+<ellipse class="mzone" data-g="Épaules" cx="140" cy="88" rx="15" ry="12"/>
+<path class="mzone" data-g="Dos" d="M72 92 Q100 86 128 92 L132 150 Q100 160 68 150 Z"/>
+<rect class="mzone" data-g="Bras" x="41" y="118" width="18" height="46" rx="9"/>
+<rect class="mzone" data-g="Bras" x="141" y="118" width="18" height="46" rx="9"/>
+<rect class="mzone" data-g="Jambes" x="69" y="322" width="26" height="80" rx="12"/>
+<rect class="mzone" data-g="Jambes" x="105" y="322" width="26" height="80" rx="12"/>
+</svg>`;
+
+let currentMonth=new Date();
+let dayState={clope:false,sport:false};
+let seance=[];let customExos=[];
+let selectedMuscle=null;let bodySide='front';let nutGoal='maint';let nutData={};
+
+function todayKey(){return 'day:'+new Date().toISOString().slice(0,10);}
+function monthKey(dt){return 'month:'+dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');}
+function fmtDate(d){return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});}
+function fmtMonth(d){return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});}
+function euro(n){return (Number(n)||0).toLocaleString('fr-FR')+' €';}
+// Moteur de sauvegarde robuste : localStorage (fichier autonome) → window.storage (app) → mémoire
+const _mem={};
+let LS_OK=false;try{localStorage.setItem('__t','1');localStorage.removeItem('__t');LS_OK=true;}catch(e){LS_OK=false;}
+const WS_OK=(typeof window!=='undefined'&&window.storage&&typeof window.storage.get==='function');
+async function sGet(k){
+  if(LS_OK){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){}}
+  if(WS_OK){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch(e){return null;}}
+  return _mem[k]!==undefined?_mem[k]:null;
+}
+async function sSet(k,v){
+  if(LS_OK){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){}}
+  if(WS_OK){try{await window.storage.set(k,JSON.stringify(v));return true;}catch(e){}}
+  _mem[k]=v;return true;
+}
+async function sDel(k){
+  if(LS_OK){try{localStorage.removeItem(k);return;}catch(e){}}
+  if(WS_OK){try{await window.storage.delete(k);return;}catch(e){}}
+  delete _mem[k];
+}
+async function sList(p){
+  if(LS_OK){try{const out=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.indexOf(p)===0)out.push(key);}return out;}catch(e){}}
+  if(WS_OK){try{const r=await window.storage.list(p);return(r&&r.keys)?r.keys:[];}catch(e){return [];}}
+  return Object.keys(_mem).filter(k=>k.indexOf(p)===0);
+}
+function flash(id,msg){const e=document.getElementById(id);e.textContent=msg;setTimeout(()=>e.textContent='',2500);}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');document.getElementById(t.dataset.view).classList.add('active');
+    document.getElementById('seanceBar').style.display=(t.dataset.view==='corps'&&seance.length>0)?'block':'none';
+    if(t.dataset.view==='mois')loadMonth();
+    if(t.dataset.view==='journal')loadJournal();
+    if(t.dataset.view==='charges')loadCharges();
+    if(t.dataset.view==='biz')loadBiz();
+    if(t.dataset.view==='corps')loadCorps();
+    if(t.dataset.view==='nutri')loadNut();
+  };
+});
+
+function renderHabits(){
+  const c=document.getElementById('habits');c.innerHTML='';
+  [{id:'clope',name:'Pas de clope au boulot',sub:'La règle nette, pas de négociation'},
+   {id:'sport',name:'Séance de sport',sub:'Rameur 5-10 min puis ta séance'}].forEach(h=>{
+    const done=dayState[h.id];const el=document.createElement('div');el.className='habit'+(done?' done':'');
+    el.innerHTML='<div class="check">'+(done?'✓':'')+'</div><div><div class="h-name">'+h.name+'</div><div class="h-sub">'+h.sub+'</div></div>';
+    el.onclick=()=>{dayState[h.id]=!dayState[h.id];renderHabits();};c.appendChild(el);});
+}
+async function loadDay(){const d=await sGet(todayKey());if(d){dayState={clope:!!d.clope,sport:!!d.sport};document.getElementById('ressenti').value=d.ressenti||'';}renderHabits();await computeStreaks();}
+async function saveDay(){const cur=await sGet(todayKey())||{};await sSet(todayKey(),{clope:dayState.clope,sport:dayState.sport,ressenti:document.getElementById('ressenti').value,sessions:cur.sessions||0});flash('dayFlash','Journée validée ✓');await computeStreaks();}
+async function computeStreaks(){let sc=0,ss=0;
+  for(let i=0;i<400;i++){const dt=new Date();dt.setDate(dt.getDate()-i);const d=await sGet('day:'+dt.toISOString().slice(0,10));if(!d){if(i===0)continue;else break;}if(d.clope)sc++;else break;}
+  for(let i=0;i<400;i++){const dt=new Date();dt.setDate(dt.getDate()-i);const d=await sGet('day:'+dt.toISOString().slice(0,10));if(!d){if(i===0)continue;else break;}if(d.sport)ss++;else break;}
+  document.getElementById('streakClope').textContent=sc;document.getElementById('streakSport').textContent=ss;}
+
+// CORPS
+async function loadCorps(){
+  const b=await sGet('body')||{};
+  document.getElementById('bDepart').value=b.depart||'';document.getElementById('bActuel').value=b.actuel||'';
+  document.getElementById('bObjectif').value=b.objectif||'';document.getElementById('bTaille').value=b.taille||'';
+  document.getElementById('bBras').value=b.bras||'';document.getElementById('bVentre').value=b.ventre||'';
+  document.getElementById('bMg').value=b.mg||'';
+  renderBodyProgress(b);
+  const c=await sGet('customExos');customExos=c||[];
+  renderBodySvg();renderExoLib();renderSeanceBar();loadSessLog();
+}
+function renderBodyProgress(b){
+  const dep=Number(b.depart),act=Number(b.actuel),obj=Number(b.objectif);let pct=0,msg="Renseigne tes chiffres pour suivre ta progression.";
+  if(dep&&act&&obj&&dep!==obj){pct=Math.max(0,Math.min(100,((dep-act)/(dep-obj))*100));const reste=Math.abs(act-obj);msg=pct>=100?"Objectif atteint 💪 fixe-t'en un nouveau.":"Plus que "+reste.toFixed(1)+" kg jusqu'à ton objectif.";}
+  document.getElementById('bodyFill').style.width=pct+'%';document.getElementById('bodyMsg').textContent=msg;
+}
+async function saveBody(){
+  const b={depart:document.getElementById('bDepart').value,actuel:document.getElementById('bActuel').value,objectif:document.getElementById('bObjectif').value,taille:document.getElementById('bTaille').value,bras:document.getElementById('bBras').value,ventre:document.getElementById('bVentre').value,mg:document.getElementById('bMg').value};
+  await sSet('body',b);if(b.actuel){await sSet('bodylog:'+new Date().toISOString().slice(0,10),{poids:b.actuel});}
+  renderBodyProgress(b);flash('bodyFlash','Mesures enregistrées ✓');
+}
+function setSide(s){bodySide=s;document.getElementById('btFront').classList.toggle('on',s==='front');document.getElementById('btBack').classList.toggle('on',s==='back');renderBodySvg();}
+function renderBodySvg(){
+  const host=document.getElementById('bodySvgHost');host.innerHTML=bodySide==='front'?SVG_FRONT:SVG_BACK;
+  host.querySelectorAll('.mzone').forEach(z=>{
+    if(z.dataset.g===selectedMuscle)z.classList.add('sel');
+    z.onclick=()=>selectMuscle(z.dataset.g);
+  });
+}
+function selectMuscle(g){
+  selectedMuscle=g;
+  document.getElementById('muscleLabel').textContent=GROUP_LABELS[g]||g;
+  renderBodySvg();renderExoLib();
+  document.getElementById('exoLib').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderExoLib(){
+  const wrap=document.getElementById('exoLib');wrap.innerHTML='';
+  if(!selectedMuscle){wrap.innerHTML='<div class="empty">Touche un muscle au-dessus pour voir ses exercices.</div>';return;}
+  let grp=EXOS.find(x=>x.g===selectedMuscle);
+  let list=grp?grp.l.slice():[];
+  if(selectedMuscle==='Bras'){} // bras déjà groupé
+  // exos perso visibles dans tous les groupes via section dédiée
+  const title=document.createElement('p');title.className='grp-title';title.textContent=GROUP_LABELS[selectedMuscle]||selectedMuscle;wrap.appendChild(title);
+  list.forEach(ex=>wrap.appendChild(buildExo(ex)));
+  if(customExos.length){const t2=document.createElement('p');t2.className='grp-title';t2.style.marginTop='14px';t2.textContent='Mes exercices';wrap.appendChild(t2);
+    customExos.forEach(n=>wrap.appendChild(buildExo({n:n,m:["Perso"],w:"Exercice que tu as ajouté.",t:"À toi de jouer."})));}
+}
+function buildExo(ex){
+  const sel=seance.includes(ex.n);const e=document.createElement('div');e.className='exo'+(sel?' sel':'');
+  const tags=ex.m.map(m=>'<span class="tag">'+m+'</span>').join('');
+  e.innerHTML='<div class="exo-top"><div class="exo-add">'+(sel?'✓':'+')+'</div><div class="exo-name">'+ex.n+'</div><div class="exo-info">ⓘ</div></div>'+
+    '<div class="exo-detail"><div class="exo-detail-in"><b>Muscles :</b> '+tags+'<br><br><b>Pourquoi :</b> '+ex.w+'<br><br><b>Conseil :</b> '+ex.t+'</div></div>';
+  e.querySelector('.exo-add').onclick=(ev)=>{ev.stopPropagation();toggleExo(ex.n);};
+  e.querySelector('.exo-name').onclick=()=>e.classList.toggle('show-detail');
+  e.querySelector('.exo-info').onclick=()=>e.classList.toggle('show-detail');
+  return e;
+}
+function toggleExo(name){const i=seance.indexOf(name);if(i>=0)seance.splice(i,1);else seance.push(name);renderExoLib();renderSeanceBar();}
+function renderSeanceBar(){
+  const bar=document.getElementById('seanceBar');const onCorps=document.getElementById('corps').classList.contains('active');
+  bar.style.display=(onCorps&&seance.length>0)?'block':'none';
+  document.getElementById('seanceN').textContent=seance.length;
+  const list=document.getElementById('seanceList');list.innerHTML='';
+  seance.forEach(n=>{const it=document.createElement('div');it.className='sess-item';it.innerHTML='<span>'+n+'</span><span class="sess-x" onclick="toggleExo(\''+n.replace(/'/g,"\\'")+'\')">retirer</span>';list.appendChild(it);});
+}
+async function addCustomExo(){const inp=document.getElementById('customExo');const v=inp.value.trim();if(!v)return;customExos.push(v);await sSet('customExos',customExos);inp.value='';renderExoLib();}
+async function validateSeance(){
+  if(seance.length===0)return;await sSet('sess:'+Date.now(),{date:new Date().toISOString(),exercices:seance.slice()});
+  dayState.sport=true;const cur=await sGet(todayKey())||{};
+  await sSet(todayKey(),{clope:dayState.clope,sport:true,ressenti:cur.ressenti||document.getElementById('ressenti').value||'',sessions:(cur.sessions||0)+1});
+  seance=[];renderExoLib();renderSeanceBar();loadSessLog();renderHabits();computeStreaks();flash('seanceFlash','Séance validée — sport coché ✓');
+}
+async function loadSessLog(){
+  const keys=(await sList('sess:')).sort().reverse().slice(0,20);const log=document.getElementById('sessLog');log.innerHTML='';
+  if(keys.length===0){log.innerHTML='<div class="empty">Aucune séance validée pour l\'instant.</div>';return;}
+  for(const k of keys){const s=await sGet(k);if(!s)continue;const d=new Date(s.date).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+    const el=document.createElement('div');el.className='sess-log';el.innerHTML='<div class="d">'+d+' — '+s.exercices.length+' exercices</div><div>'+s.exercices.join(' · ')+'</div>';log.appendChild(el);}
+}
+
+// NUTRITION
+async function loadNut(){
+  const b=await sGet('body')||{};
+  if(!document.getElementById('nPoids').value)document.getElementById('nPoids').value=b.actuel||'';
+  if(!document.getElementById('nTaille').value)document.getElementById('nTaille').value=b.taille||'';
+  
+  const saved=await sGet('nutgoal');if(saved){nutGoal=saved;document.querySelectorAll('.goal-pick button').forEach(x=>x.classList.toggle('on',x.dataset.goal===nutGoal));}
+  calcNut();
+}
+function setGoal(g){nutGoal=g;document.querySelectorAll('.goal-pick button').forEach(x=>x.classList.toggle('on',x.dataset.goal===g));sSet('nutgoal',g);calcNut();}
+function calcNut(){
+  const p=Number(document.getElementById('nPoids').value),h=Number(document.getElementById('nTaille').value),a=Number(document.getElementById('nAge').value),act=Number(document.getElementById('nAct').value);
+  if(!p||!h||!a){document.getElementById('nBmr').textContent='--';document.getElementById('nTdee').textContent='--';document.getElementById('nGoalCal').textContent='--';return;}
+  const bmr=Math.round(10*p+6.25*h-5*a+5); // Mifflin-St Jeor homme
+  const tdee=Math.round(bmr*act);
+  document.getElementById('nBmr').textContent=bmr;document.getElementById('nTdee').textContent=tdee;
+  let cal,lab;
+  if(nutGoal==='cut'){cal=Math.round(tdee*0.80);lab='calories / jour — déficit ~20%';}
+  else if(nutGoal==='bulk'){cal=Math.round(tdee*1.10);lab='calories / jour — surplus léger +10%';}
+  else{cal=tdee;lab='calories / jour — maintien';}
+  document.getElementById('nGoalCal').textContent=cal;document.getElementById('nGoalLab').textContent=lab;
+  const prot=Math.round(p*2.0);const fat=Math.round(p*0.9);
+  const carbCal=cal-(prot*4)-(fat*9);const carb=Math.max(0,Math.round(carbCal/4));
+  document.getElementById('nProt').textContent=prot+' g';document.getElementById('nFat').textContent=fat+' g';document.getElementById('nCarb').textContent=carb+' g';
+  let adv='';
+  if(nutGoal==='cut')adv="<b>Perdre du gras en gardant le muscle :</b><br>• Déficit modéré (pas plus de ~20%), sinon tu fonds aussi du muscle.<br>• Protéines hautes ("+prot+" g) : c'est ce qui protège ton muscle.<br>• Continue la musculation : sans elle, le corps puise dans le muscle.<br>• Vise ~0,5 kg/semaine max. Dors bien, le manque de sommeil sabote tout.";
+  else if(nutGoal==='bulk')adv="<b>Prendre du muscle sans trop de gras :</b><br>• Surplus LÉGER (+10% seulement). Manger énorme = surtout du gras.<br>• Protéines à "+prot+" g, réparties sur la journée.<br>• Progresse en charge à la muscu : c'est le vrai signal de croissance.<br>• Vise ~0,25-0,5 kg/mois. Lent mais propre.";
+  else adv="<b>Maintien :</b><br>• Tu manges autour de ta dépense, ton poids reste stable.<br>• Garde les protéines à "+prot+" g pour entretenir le muscle.<br>• Bon point de départ pour observer ton corps avant de viser perte ou prise.";
+  document.getElementById('nutAdviceTxt').innerHTML=adv;
+}
+
+// MOIS
+function changeMonth(dir){currentMonth.setMonth(currentMonth.getMonth()+dir);loadMonth();}
+async function loadMonth(){document.getElementById('monthLabel').textContent=fmtMonth(currentMonth);const m=await sGet(monthKey(currentMonth))||{};
+  document.getElementById('finEpargne').value=m.epargne||'';document.getElementById('finDepenses').value=m.depenses||'';document.getElementById('finNote').value=m.note||'';
+  setStatus('voiture',m.voiture||'À faire');setStatus('puro',m.puro||'À faire');await computeMatelas();}
+async function saveMonth(){await sSet(monthKey(currentMonth),{epargne:document.getElementById('finEpargne').value,depenses:document.getElementById('finDepenses').value,note:document.getElementById('finNote').value,voiture:getStatus('voiture'),puro:getStatus('puro')});flash('monthFlash','Mois enregistré ✓');await computeMatelas();}
+async function computeMatelas(){let total=0;const keys=await sList('month:');for(const k of keys){const m=await sGet(k);if(m&&m.epargne)total+=Number(m.epargne)||0;}document.getElementById('matelasVal').textContent=euro(total);document.getElementById('matelasFill').style.width=Math.min(100,(total/10000)*100)+'%';}
+const STATUSES=['À faire','En cours','Fait'];
+function cycleStatus(el){const cur=el.textContent.trim();const next=STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length];el.textContent=next;el.style.color=next==='Fait'?'var(--good)':next==='En cours'?'var(--accent)':'var(--ink-soft)';}
+function setStatus(p,v){const el=document.querySelector('[data-proj="'+p+'"]');el.textContent=v;el.style.color=v==='Fait'?'var(--good)':v==='En cours'?'var(--accent)':'var(--ink-soft)';}
+function getStatus(p){return document.querySelector('[data-proj="'+p+'"]').textContent.trim();}
+
+// BUSINESS
+async function addBiz(){const name=document.getElementById('bizName').value.trim();const amt=document.getElementById('bizAmt').value;const note=document.getElementById('bizNote').value.trim();
+  if(!name){flash('bizFlash','Mets un nom de business');return;}await sSet('biz:'+Date.now(),{name:name,amt:Number(amt)||0,note:note,date:new Date().toISOString()});
+  document.getElementById('bizName').value='';document.getElementById('bizAmt').value='';document.getElementById('bizNote').value='';flash('bizFlash','Entrée enregistrée ✓');loadBiz();}
+async function loadBiz(){const keys=(await sList('biz:')).sort().reverse();const totals={};const log=document.getElementById('bizLog');log.innerHTML='';const names=new Set();
+  if(keys.length===0)log.innerHTML='<div class="empty">Aucune entrée.</div>';
+  for(const k of keys){const e=await sGet(k);if(!e)continue;totals[e.name]=(totals[e.name]||0)+(e.amt||0);names.add(e.name);
+    const d=new Date(e.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});const cls=e.amt>0?'pos':e.amt<0?'neg':'';const sign=e.amt>0?'+':'';
+    const el=document.createElement('div');el.className='biz-entry';el.innerHTML='<div class="biz-head"><span class="biz-name">'+e.name+'</span><span class="biz-amt '+cls+'">'+sign+euro(e.amt)+'</span></div><div class="biz-date">'+d+'</div>'+(e.note?'<div class="biz-note">'+e.note+'</div>':'')+'<div class="biz-head" style="margin-top:8px;margin-bottom:0;"><span></span><span class="del" onclick="delBiz(\''+k+'\')">supprimer</span></div>';log.appendChild(el);}
+  const tdiv=document.getElementById('bizTotals');const ent=Object.entries(totals);
+  if(ent.length===0)tdiv.innerHTML='<div class="empty">Rien encore.</div>';
+  else{tdiv.innerHTML='';ent.forEach(([n,v])=>{const cls=v>0?'pos':v<0?'neg':'';const sign=v>0?'+':'';const r=document.createElement('div');r.className='biz-total';r.innerHTML='<span>'+n+'</span><span class="biz-amt '+cls+'">'+sign+euro(v)+'</span>';tdiv.appendChild(r);});}
+  const dl=document.getElementById('bizList');dl.innerHTML='';names.forEach(n=>{const o=document.createElement('option');o.value=n;dl.appendChild(o);});}
+async function delBiz(k){await sDel(k);loadBiz();}
+
+// ===== CHARGES =====
+const CHARGES_DEFAUT=[
+  {nom:"Forfait téléphone + internet",montant:0},
+  {nom:"Eau",montant:0},
+  {nom:"Électricité",montant:0},
+  {nom:"Courses",montant:0},
+  {nom:"Abonnements",montant:0},
+  {nom:"Virement épargne",montant:0},
+];
+function moisCourant(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function moisJoli(key){const [y,m]=key.split('-');const d=new Date(Number(y),Number(m)-1,1);return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});}
+
+let chargeModele=[];let chargeEtat={};
+async function loadCharges(){
+  chargeModele=await sGet('charges:modele');
+  if(!chargeModele){chargeModele=CHARGES_DEFAUT.map((c,i)=>({id:'c'+i,nom:c.nom,montant:c.montant}));await sSet('charges:modele',chargeModele);}
+  await verifierReset(chargeModele);
+  const mc=moisCourant();
+  chargeEtat=await sGet('charges:etat:'+mc)||{};
+  renderCharges();
+  loadChargeHist();
+}
+
+async function verifierReset(modele){
+  const mc=moisCourant();
+  const dernier=await sGet('charges:dernierMois');
+  if(dernier && dernier!==mc){
+    const etatPrec=await sGet('charges:etat:'+dernier)||{};
+    const modelePrec=await sGet('charges:modele:'+dernier)||modele;
+    const archive={mois:dernier,charges:modelePrec.map(c=>({nom:c.nom,montant:c.montant,paye:!!etatPrec[c.id]}))};
+    await sSet('charges:archive:'+dernier,archive);
+  }
+  if(dernier!==mc){
+    await sSet('charges:modele:'+mc,modele);
+    await sSet('charges:dernierMois',mc);
+  }
+}
+
+function renderCharges(){
+  const mc=moisCourant();
+  document.getElementById('chargeMonthLabel').textContent='Charges — '+moisJoli(mc);
+  const list=document.getElementById('chargeList');list.innerHTML='';
+  let total=0,paye=0;
+  chargeModele.forEach(c=>{
+    total+=Number(c.montant)||0;
+    const estPaye=!!chargeEtat[c.id];
+    if(estPaye)paye+=Number(c.montant)||0;
+    const el=document.createElement('div');el.className='charge-item'+(estPaye?' paid':'');
+    el.innerHTML='<div class="charge-check">'+(estPaye?'✓':'')+'</div>'+
+      '<div class="charge-info"><div class="charge-name">'+c.nom+'</div></div>'+
+      '<div class="charge-amt">'+(Number(c.montant)||0).toLocaleString('fr-FR')+' €</div>'+
+      '<div class="charge-del">×</div>';
+    el.querySelector('.charge-check').onclick=()=>toggleCharge(c.id);
+    el.querySelector('.charge-amt').onclick=()=>openChargeModal(c.id);
+    el.querySelector('.charge-name').onclick=()=>openChargeModal(c.id);
+    el.querySelector('.charge-del').onclick=()=>openChargeModal(c.id);
+    list.appendChild(el);
+  });
+  const pct=total>0?Math.round((paye/total)*100):0;
+  document.getElementById('chargePct').textContent=pct+'%';
+  document.getElementById('chargePaid').textContent=paye.toLocaleString('fr-FR')+' €';
+  document.getElementById('chargeTotal').textContent=total.toLocaleString('fr-FR')+' €';
+  document.getElementById('chargeRest').textContent=(total-paye).toLocaleString('fr-FR')+' €';
+  document.getElementById('chargeFill').style.width=pct+'%';
+  const sum=document.getElementById('chargeSum');
+  if(pct>=100 && total>0){sum.classList.add('done');document.getElementById('chargeFill').style.background='var(--good)';}
+  else{sum.classList.remove('done');document.getElementById('chargeFill').style.background='var(--accent)';}
+}
+
+function toggleCharge(id){
+  chargeEtat[id]=!chargeEtat[id];   // mémoire d'abord → coche instantanée
+  renderCharges();
+  sSet('charges:etat:'+moisCourant(),chargeEtat); // sauvegarde en arrière-plan
+}
+function addCharge(){
+  const nom=document.getElementById('newChargeName').value.trim();
+  const montant=Number(document.getElementById('newChargeAmt').value)||0;
+  if(!nom){flash('chargeFlash','Mets un nom');return;}
+  chargeModele.push({id:'c'+Date.now(),nom:nom,montant:montant});
+  document.getElementById('newChargeName').value='';document.getElementById('newChargeAmt').value='';
+  flash('chargeFlash','Charge ajoutée ✓');
+  renderCharges();
+  sSet('charges:modele',chargeModele);sSet('charges:modele:'+moisCourant(),chargeModele);
+}
+let modalChargeId=null;
+function openChargeModal(id){
+  const c=chargeModele.find(x=>x.id===id);if(!c)return;
+  modalChargeId=id;
+  document.getElementById('modalTitle').textContent='Modifier : '+c.nom;
+  document.getElementById('modalName').value=c.nom;
+  const m=Number(c.montant)||0;
+  document.getElementById('modalAmt').value=m;
+  document.getElementById('modalSlider').value=Math.min(1000,m);
+  document.getElementById('modalAmtBig').textContent=m.toLocaleString('fr-FR')+' €';
+  document.getElementById('chargeModal').style.display='flex';
+}
+function closeChargeModal(){document.getElementById('chargeModal').style.display='none';modalChargeId=null;}
+function modalSliderInput(){
+  const v=document.getElementById('modalSlider').value;
+  document.getElementById('modalAmt').value=v;
+  document.getElementById('modalAmtBig').textContent=Number(v).toLocaleString('fr-FR')+' €';
+}
+function modalAmtInput(){
+  const v=Number(document.getElementById('modalAmt').value)||0;
+  document.getElementById('modalSlider').value=Math.min(1000,v);
+  document.getElementById('modalAmtBig').textContent=v.toLocaleString('fr-FR')+' €';
+}
+function saveChargeModal(){
+  if(!modalChargeId)return;
+  const c=chargeModele.find(x=>x.id===modalChargeId);if(!c)return;
+  const nom=document.getElementById('modalName').value.trim();
+  const montant=Number(document.getElementById('modalAmt').value)||0;
+  if(nom)c.nom=nom;c.montant=montant;
+  renderCharges();
+  sSet('charges:modele',chargeModele);sSet('charges:modele:'+moisCourant(),chargeModele);
+  closeChargeModal();
+}
+function deleteChargeModal(){
+  if(!modalChargeId)return;
+  const c=chargeModele.find(x=>x.id===modalChargeId);
+  chargeModele=chargeModele.filter(x=>x.id!==modalChargeId);
+  if(chargeEtat[modalChargeId]){delete chargeEtat[modalChargeId];sSet('charges:etat:'+moisCourant(),chargeEtat);}
+  renderCharges();
+  sSet('charges:modele',chargeModele);sSet('charges:modele:'+moisCourant(),chargeModele);
+  closeChargeModal();
+}
+function exportChargesPDF(){
+  const mc=moisCourant();
+  let total=0,paye=0;
+  chargeModele.forEach(c=>{total+=Number(c.montant)||0;if(chargeEtat[c.id])paye+=Number(c.montant)||0;});
+  const pct=total>0?Math.round((paye/total)*100):0;
+  let rows='';
+  chargeModele.forEach(c=>{
+    const ok=!!chargeEtat[c.id];
+    rows+='<tr><td>'+c.nom+'</td><td class="r">'+(Number(c.montant)||0).toLocaleString('fr-FR')+' €</td><td class="r '+(ok?'ok':'no')+'">'+(ok?'Payé':'À payer')+'</td></tr>';
+  });
+  document.getElementById('printArea').innerHTML=
+    '<h2>Bilan des charges</h2>'+
+    '<p class="pa-sub">'+moisJoli(mc)+' </p>'+
+    '<div style="font-size:15px;margin-bottom:4px;"><b>'+pct+'% payé</b> · Payé : '+paye.toLocaleString('fr-FR')+' € / Total : '+total.toLocaleString('fr-FR')+' € · Reste : '+(total-paye).toLocaleString('fr-FR')+' €</div>'+
+    '<div class="pa-bar"><div class="pa-fill" style="width:'+pct+'%"></div></div>'+
+    '<table><thead><tr><th>Charge</th><th class="r">Montant</th><th class="r">Statut</th></tr></thead><tbody>'+rows+
+    '<tr><td><b>TOTAL</b></td><td class="r"><b>'+total.toLocaleString('fr-FR')+' €</b></td><td class="r"><b>'+pct+'%</b></td></tr>'+
+    '</tbody></table>';
+  window.print();
+}
+async function loadChargeHist(){
+  const keys=(await sList('charges:archive:')).sort().reverse();
+  const wrap=document.getElementById('chargeHist');wrap.innerHTML='';
+  if(keys.length===0){wrap.innerHTML='<div class="empty">Aucun mois archivé pour l\'instant.</div>';return;}
+  for(const k of keys){const a=await sGet(k);if(!a)continue;
+    let totalPaye=0;const impayes=[];
+    a.charges.forEach(c=>{if(c.paye)totalPaye+=Number(c.montant)||0;else impayes.push(c.nom);});
+    const tout=impayes.length===0;
+    const el=document.createElement('div');el.className='hist-month';
+    el.innerHTML='<div class="hist-head"><span class="hist-name">'+moisJoli(a.mois)+'</span><span class="hist-badge">'+(tout?'✅':'⚠️')+'</span></div>'+
+      '<div class="hist-detail">Payé : '+totalPaye.toLocaleString('fr-FR')+' €'+
+      (tout?' — tout réglé':'<br><span class="hist-unpaid">Impayé : '+impayes.join(', ')+'</span>')+'</div>';
+    wrap.appendChild(el);
+  }
+}
+
+document.getElementById('todayDate').textContent=fmtDate(new Date());
+loadDay();
+
+// ===== JOURNAL =====
+async function saveJournal(){
+  const txt=document.getElementById('journalText').value.trim();
+  if(!txt){flash('journalFlash','Écris ou dicte quelque chose');return;}
+  await sSet('journal:'+Date.now(),{date:new Date().toISOString(),text:txt});
+  document.getElementById('journalText').value='';
+  flash('journalFlash','Écrit et gardé pour toi ✓');
+  loadJournal();
+}
+async function loadJournal(){
+  const keys=(await sList('journal:')).sort().reverse();
+  const wrap=document.getElementById('journalList');wrap.innerHTML='';
+  if(keys.length===0){wrap.innerHTML='<div class="empty">Aucune entrée pour l\'instant.</div>';return;}
+  let dernierJour='';
+  for(const k of keys){
+    const e=await sGet(k);if(!e)continue;
+    const d=new Date(e.date);
+    const jour=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    if(jour!==dernierJour){const h=document.createElement('div');h.className='jour-day';h.textContent=jour;wrap.appendChild(h);dernierJour=jour;}
+    const heure=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const el=document.createElement('div');el.className='jour-entry';
+    el.innerHTML='<div class="jour-time"><span>'+heure+'</span><span class="del">supprimer</span></div><div class="jour-body"></div>';
+    el.querySelector('.jour-body').textContent=e.text;
+    el.querySelector('.del').onclick=()=>delJournal(k);
+    wrap.appendChild(el);
+  }
+}
+async function delJournal(k){await sDel(k);loadJournal();}
+// Vérifie au démarrage si un mois s'est écoulé (archive + reset des charges)
+(async()=>{let modele=await sGet('charges:modele');if(!modele){modele=CHARGES_DEFAUT.map((c,i)=>({id:'c'+i,nom:c.nom,montant:c.montant}));await sSet('charges:modele',modele);}await verifierReset(modele);})();
+</script>
+</body>
+</html>
