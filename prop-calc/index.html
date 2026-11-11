@@ -192,9 +192,28 @@ input[type=range]{width:100%;height:30px;accent-color:var(--accent);margin:2px 0
 .viz-label{display:flex;justify-content:space-between;gap:8px;font:500 12px var(--font-num);color:var(--muted)}
 .meter{position:relative;height:10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
 .meter i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--good),var(--warn));transition:width .7s cubic-bezier(.2,.8,.2,1)}
-#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font:600 14px var(--font-body);box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1.2);z-index:40;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+.validate-panel{border:2px dashed var(--good);background:var(--good-soft)}
+.validate-panel h2{color:var(--good)}
+.btn.validate{background:var(--good);border-color:var(--good);color:var(--surface);font-size:16px;min-height:56px;width:100%}
+.status .btn.validate{margin-top:8px;min-height:48px}
+.modal-back{position:fixed;inset:0;background:rgba(8,12,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:35;animation:fade .2s ease both}
+.modal{background:var(--surface);color:var(--ink);border-radius:18px;padding:24px 20px 20px;max-width:420px;width:100%;max-height:calc(100% - 20px);overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 70px rgba(0,0,0,.4);animation:zoom .38s cubic-bezier(.2,.9,.3,1.25) both;text-align:center}
+.modal h2{font:700 26px/1.15 var(--font-display);color:var(--ink);text-transform:none;letter-spacing:.01em;text-wrap:balance}
+.modal p{margin:0;font-size:15px;line-height:1.5}
+.modal .rules{text-align:left}
+.modal .btn-col{display:flex;flex-direction:column;gap:8px}
+.medal{width:104px;height:104px;margin:0 auto;display:block;animation:pop .6s .95s cubic-bezier(.3,.7,.3,1.5) both}
+.medal .ring{stroke-dasharray:300;animation:ring .85s .1s ease-out both}
+.medal .tick{stroke-dasharray:90;animation:tick .45s .75s ease-out both}
+.medal .burst{transform-origin:52px 52px;animation:burst .9s .8s ease-out both}
+@keyframes ring{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+@keyframes tick{from{stroke-dashoffset:90}to{stroke-dashoffset:0}}
+@keyframes burst{0%{opacity:0;transform:scale(.6)}40%{opacity:1}100%{opacity:0;transform:scale(1.35)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes zoom{from{opacity:0;transform:scale(.82) translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -316,7 +335,8 @@ const PLANS = {
     }},
   custom: {name:'Compte personnalisé', short:'Mon compte', size:50000, microRatio:10, metalsBlocked:false, source:'',
     phases:{
-      eval:{label:'Évaluation', target:3000, dd:2000, dll:0, consistency:0, minDays:1, firmMax:5, scaling:null, rules:['Règles saisies à la main dans les réglages.']}
+      eval:{label:'Évaluation', target:3000, dd:2000, dll:0, consistency:0, minDays:1, firmMax:5, scaling:null, rules:['Règles saisies à la main dans les réglages.']},
+      funded:{label:'Financé', target:3000, dd:2000, dll:0, consistency:0, minDays:1, firmMax:5, scaling:null, rules:['Règles saisies à la main dans les réglages.']}
     }}
 };
 const PLAN_ORDER = ['apex50','lucid50pro','lucid50flex','tradeify100select','tradeify100growth','custom'];
@@ -655,7 +675,10 @@ function renderTabs(){
   }).join('') + '<button class="tab add" data-act="add" aria-selected="' + ui.adding + '">+ Compte</button>';
 }
 
-function statusHTML(a, c){ return '<div class="label">' + c.status.label + '</div><div>' + c.status.text + '</div>'; }
+function statusHTML(a, c){
+  return '<div class="label">' + c.status.label + '</div><div>' + c.status.text + '</div>' +
+    (isEval(a) && c.remaining <= 0 && c.buffer > 0 ? '<button class="btn validate" data-act="validate-open">J’ai validé ce compte</button>' : '');
+}
 
 function slControlHTML(a){
   const U = UND[a.und], v = a.sl[a.und];
@@ -943,6 +966,7 @@ function render(opts){
       '</div><div id="o-progress" style="display:flex;flex-direction:column;gap:8px">' + progressOutHTML(a, c) + '</div></section>' +
     '<section class="panel"><h2>Scénarios pour ' + (c.monthly ? 'finir le mois' : 'valider') + '</h2><div id="o-scen" style="display:flex;flex-direction:column;gap:10px">' + scenHTML(a, c) + '</div></section>' +
     settingsHTML(a) +
+    (isEval(a) ? '<section class="panel validate-panel"><h2>Compte validé ?</h2><p class="note">Quand la firm t’a validé ce compte, appuie ici : il passe en mode financé avec ses nouvelles règles.</p><button class="btn validate" data-act="validate-open">J’ai validé ce compte</button></section>' : '') +
     '<p class="foot">Règles vérifiées le ' + VERIFIED + '. Elles changent souvent : confirme-les sur ton dashboard. Données enregistrées sur cet appareil.</p>';
   toggleMethod(a);
   const det = document.getElementById('settings');
@@ -1088,6 +1112,49 @@ function celebrate(kind){
   else if(kind === 'undo'){ toast('Dernier trade annulé'); }
 }
 
+/* ---------- Validation du compte ---------- */
+function openModal(html){
+  closeModal();
+  const back = document.createElement('div');
+  back.className = 'modal-back'; back.id = 'modal';
+  back.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">' + html + '</div>';
+  back.addEventListener('click', function(e){ if(e.target === back) closeModal(); });
+  document.body.appendChild(back);
+  const f = back.querySelector('.btn'); if(f) f.focus();
+}
+function closeModal(){ const m = document.getElementById('modal'); if(m) m.remove(); }
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+function fundedPhases(a){ const P = PLANS[a.plan] || PLANS.custom; return Object.keys(P.phases).filter(function(k){ return k !== 'eval'; }); }
+function confirmValidateHTML(a){
+  const P = PLANS[a.plan] || PLANS.custom, keys = fundedPhases(a);
+  const btns = keys.map(function(k){
+    return '<button class="btn validate" data-act="validate-confirm" data-k="' + k + '">' + (keys.length > 1 ? 'Oui, passer en ' + P.phases[k].label : 'Oui, passer en compte financé') + '</button>';
+  }).join('');
+  return '<h2 id="modal-title">Tu as validé ' + esc(a.name) + ' ?</h2>' +
+    '<p>On passe ce compte en <b>financé</b> : les règles changent, le solde repart à ' + money(a.size) + ' et tu passes sur un objectif par mois.</p>' +
+    (keys.length > 1 ? '<p class="note">Choisis le mode de retrait que tu as pris chez la firm.</p>' : '') +
+    '<div class="btn-col">' + btns + '<button class="btn ghost" data-act="modal-close">Pas encore</button></div>';
+}
+function successHTML(a){
+  const ph = phaseOf(a);
+  return '<svg class="medal" viewBox="0 0 104 104" aria-hidden="true">' +
+      '<g class="burst" stroke="var(--warn)" stroke-width="4" stroke-linecap="round"><line x1="52" y1="4" x2="52" y2="14"/><line x1="52" y1="90" x2="52" y2="100"/><line x1="4" y1="52" x2="14" y2="52"/><line x1="90" y1="52" x2="100" y2="52"/><line x1="18" y1="18" x2="25" y2="25"/><line x1="79" y1="79" x2="86" y2="86"/><line x1="86" y1="18" x2="79" y2="25"/><line x1="25" y1="79" x2="18" y2="86"/></g>' +
+      '<circle cx="52" cy="52" r="34" fill="var(--good-soft)"/>' +
+      '<circle class="ring" cx="52" cy="52" r="34" fill="none" stroke="var(--good)" stroke-width="6" stroke-linecap="round" transform="rotate(-90 52 52)"/>' +
+      '<path class="tick" d="M37 53 L48 64 L68 42" fill="none" stroke="var(--good)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+    '<h2 id="modal-title">Félicitations, compte validé !</h2>' +
+    '<p><b>' + esc(a.name) + '</b> passe en <b>' + ph.label + '</b>. Nouvelle étape : régularité et discipline, pour aller chercher les retraits.</p>' +
+    '<ul class="rules">' + ph.rules.slice(0, 3).map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
+    '<p class="note">Objectif du mois réglé à ' + money(a.monthlyGoal) + ' : change-le dans les réglages du compte.</p>' +
+    '<div class="btn-col"><button class="btn validate" data-act="modal-close">C’est parti</button></div>';
+}
+function celebrateValidation(){
+  buzz([40, 60, 40, 60, 120]);
+  confetti(220);
+  setTimeout(function(){ confetti(140); }, 650);
+  setTimeout(function(){ confetti(140); }, 1300);
+}
+
 /* ---------- Interactions ---------- */
 const INT_FIELDS = {nR:1, nSL:1, persoCap:1, maxTrades:1, maxSLDay:1, daysGoal:1, minDays:1, firmMax:1, tradesToday:1, microRatio:1, tradingDays:1, tpPerDay:1};
 function resetForPhase(a){
@@ -1168,6 +1235,18 @@ function handleAct(btn){
       }
       break;
     }
+    case 'validate-open': openModal(confirmValidateHTML(a)); return;
+    case 'modal-close': closeModal(); return;
+    case 'validate-confirm': {
+      const k = btn.dataset.k;
+      const P = PLANS[a.plan] || PLANS.custom;
+      if(!P.phases[k]) return;
+      a.phase = k; resetForPhase(a); a.goalMode = 'monthly'; a.validatedAt = todayStr();
+      ui.settingsOpen = false; prevSlots = null;
+      render({enter:true}); touch();
+      openModal(successHTML(a)); celebrateValidation();
+      return;
+    }
     case 'reset-rules': applyPhase(a); ui.settingsOpen = true; break;
     case 'export': {
       const code = JSON.stringify({v:2, accounts:state.accounts, selected:state.selected, updatedAt:state.updatedAt});
@@ -1214,7 +1293,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '4';
+const APP_VERSION = '5';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
