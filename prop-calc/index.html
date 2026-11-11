@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f4fd1">
+<meta name="theme-color" content="#05060a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -17,28 +17,14 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Layout : une colonne façon ticket de trading — statut, nombre de contrats, journée, règles, progression, scénarios, réglages */
-  --bg:#eef0f4; --surface:#ffffff; --ink:#151821; --muted:#596070; --line:#d8dce4;
-  --accent:#1f4fd1; --accent-soft:#e4e9fb; --accent-ink:#ffffff;
-  --good:#11734a; --good-soft:#def2e7; --warn:#8f5300; --warn-soft:#f8edd6; --bad:#b01f2a; --bad-soft:#f8e0e2;
+  /* Layout : une colonne façon ticket de trading sur fond noir, halos néon flous en arrière-plan, cartes en verre fumé */
+  --bg:#05060a; --surface:rgba(16,18,28,.72); --ink:#eaedf6; --muted:#8a92a8; --line:rgba(255,255,255,.08);
+  --accent:#22e6ff; --accent-soft:rgba(34,230,255,.10); --accent-ink:#03141a;
+  --good:#39ff9f; --good-soft:rgba(57,255,159,.10); --warn:#ffb84d; --warn-soft:rgba(255,184,77,.10); --bad:#ff3d8b; --bad-soft:rgba(255,61,139,.11);
   --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --radius:10px;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0e1117; --surface:#161a22; --ink:#e7eaf0; --muted:#9aa2b0; --line:#282e39;
-    --accent:#8ea6ff; --accent-soft:#1c2440; --accent-ink:#0e1117;
-    --good:#4fc78c; --good-soft:#12261c; --warn:#f0b257; --warn-soft:#2b2211; --bad:#ff7f88; --bad-soft:#30181b;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0e1117; --surface:#161a22; --ink:#e7eaf0; --muted:#9aa2b0; --line:#282e39;
-  --accent:#8ea6ff; --accent-soft:#1c2440; --accent-ink:#0e1117;
-  --good:#4fc78c; --good-soft:#12261c; --warn:#f0b257; --warn-soft:#2b2211; --bad:#ff7f88; --bad-soft:#30181b;
+  --radius:12px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -214,10 +200,68 @@ input[type=range]{width:100%;height:30px;accent-color:var(--accent);margin:2px 0
 @keyframes burst{0%{opacity:0;transform:scale(.6)}40%{opacity:1}100%{opacity:0;transform:scale(1.35)}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes zoom{from{opacity:0;transform:scale(.82) translateY(10px)}to{opacity:1;transform:none}}
+html{background:#05060a}
+body{background:transparent}
+.ambient{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 85%);mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 85%)}
+.glowfield{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.glowfield i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;filter:blur(70px);opacity:.2;will-change:transform}
+.glowfield .o1{background:#22e6ff;top:-28vmax;left:-24vmax;animation:drift1 28s ease-in-out infinite alternate}
+.glowfield .o2{background:#8b5cff;top:18vh;right:-34vmax;opacity:.17;animation:drift2 34s ease-in-out infinite alternate}
+.glowfield .o3{background:#39ff9f;bottom:-38vmax;left:-6vmax;opacity:.12;animation:drift3 30s ease-in-out infinite alternate}
+.glowfield .o4{background:#ff3d8b;bottom:8vh;right:-30vmax;width:38vmax;height:38vmax;opacity:.09;animation:drift2 38s ease-in-out infinite alternate-reverse}
+@keyframes drift1{to{transform:translate(18vmax,14vmax) scale(1.12)}}
+@keyframes drift2{to{transform:translate(-16vmax,-10vmax) scale(.9)}}
+@keyframes drift3{to{transform:translate(14vmax,-12vmax) scale(1.08)}}
+.spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;animation:twinkle 5s ease-in-out infinite;opacity:.35}
+.spark.c{background:#22e6ff;box-shadow:0 0 8px 2px rgba(34,230,255,.7)}
+.spark.g{background:#39ff9f;box-shadow:0 0 8px 2px rgba(57,255,159,.6)}
+.spark.v{background:#b69bff;box-shadow:0 0 8px 2px rgba(139,92,255,.6)}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.9;transform:scale(1.2)}}
+header.top{margin:0 calc(-1 * max(16px, env(safe-area-inset-left)));padding-left:max(16px, env(safe-area-inset-left));padding-right:max(16px, env(safe-area-inset-right));background:rgba(5,6,10,.7);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border-bottom-color:rgba(255,255,255,.06)}
+.panel,.status{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.tile{background:rgba(255,255,255,.02)}
+.logo{box-shadow:0 0 18px rgba(61,109,255,.55),0 0 2px rgba(34,230,255,.6)}
+h1{text-shadow:0 0 18px rgba(34,230,255,.25)}
+.hero{border-color:rgba(34,230,255,.5);box-shadow:inset 0 0 0 1px rgba(34,230,255,.25),0 0 34px rgba(34,230,255,.12)}
+.hero h2{text-shadow:0 0 12px rgba(34,230,255,.55)}
+.bignum{color:#f2fdff;text-shadow:0 0 22px rgba(34,230,255,.6),0 0 3px rgba(34,230,255,.9)}
+.bignum.zero{color:var(--bad);text-shadow:0 0 20px rgba(255,61,139,.55)}
+.status.good{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),-6px 0 22px -10px rgba(57,255,159,.9)}
+.status.warn{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),-6px 0 22px -10px rgba(255,184,77,.9)}
+.status.bad{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),-6px 0 22px -10px rgba(255,61,139,.9)}
+.status .label{text-shadow:0 0 10px currentColor}
+.tab{background:rgba(255,255,255,.04)}
+.tab[aria-selected="true"]{color:var(--accent-ink);box-shadow:0 0 18px rgba(34,230,255,.45)}
+.btn{background:rgba(255,255,255,.04)}
+.btn.good{color:#03140b;box-shadow:0 0 20px rgba(57,255,159,.32)}
+.btn.bad{color:#18040c;box-shadow:0 0 20px rgba(255,61,139,.32)}
+.btn.primary{color:var(--accent-ink);box-shadow:0 0 18px rgba(34,230,255,.32)}
+.btn.validate{color:#03140b;box-shadow:0 0 24px rgba(57,255,159,.38)}
+.btn.ghost,.btn.danger{background:transparent}
+.seg{background:rgba(255,255,255,.03)}
+.seg button[aria-checked="true"]{background:var(--accent-soft);color:var(--accent);box-shadow:0 0 0 1px rgba(34,230,255,.45),0 0 16px rgba(34,230,255,.2)}
+.field input,.field select,textarea,.sl-row button{background:rgba(255,255,255,.04)}
+.field input:focus,.field select:focus,textarea:focus{border-color:rgba(34,230,255,.6);box-shadow:0 0 0 3px rgba(34,230,255,.15);outline:none}
+.slot{background:rgba(255,255,255,.04)}
+.slot.on{box-shadow:0 0 12px rgba(34,230,255,.65)}
+.bar,.meter{background:rgba(255,255,255,.04)}
+.bar i{box-shadow:0 0 12px rgba(34,230,255,.7)}
+.meter i{box-shadow:0 0 12px rgba(57,255,159,.5)}
+.chip{background:rgba(255,255,255,.03)}
+.chip.tp{box-shadow:0 0 10px rgba(57,255,159,.25)} .chip.sl{box-shadow:0 0 10px rgba(255,61,139,.25)}
+tr.cur td{background:var(--accent-soft);color:var(--accent)}
+.validate-panel{box-shadow:0 0 30px rgba(57,255,159,.12)}
+.modal{background:rgba(11,13,21,.96);border:1px solid rgba(57,255,159,.35);box-shadow:0 0 44px rgba(57,255,159,.18),0 24px 70px rgba(0,0,0,.7)}
+.modal-back{background:rgba(2,3,6,.72)}
+.toast{background:rgba(16,20,32,.94);color:var(--ink);border:1px solid rgba(34,230,255,.35);box-shadow:0 0 22px rgba(34,230,255,.25),0 8px 24px rgba(0,0,0,.4)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<div class="glowfield" aria-hidden="true"><i class="o1"></i><i class="o2"></i><i class="o3"></i><i class="o4"></i></div>
+<div class="ambient" aria-hidden="true"><span class="spark c" style="top:12%;left:82%;animation-delay:0s;animation-duration:5s"></span><span class="spark g" style="top:28%;left:8%;animation-delay:1.4s;animation-duration:6s"></span><span class="spark v" style="top:46%;left:92%;animation-delay:2.2s;animation-duration:7s"></span><span class="spark c" style="top:63%;left:14%;animation-delay:0.7s;animation-duration:5.5s"></span><span class="spark " style="top:74%;left:70%;animation-delay:3.1s;animation-duration:6.5s"></span><span class="spark g" style="top:88%;left:38%;animation-delay:1.9s;animation-duration:5s"></span><span class="spark v" style="top:8%;left:34%;animation-delay:2.8s;animation-duration:6s"></span><span class="spark " style="top:52%;left:52%;animation-delay:4s;animation-duration:7.5s"></span></div>
 <div class="wrap">
   <header class="top">
     <div class="title-row">
@@ -1293,7 +1337,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '5';
+const APP_VERSION = '6';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
