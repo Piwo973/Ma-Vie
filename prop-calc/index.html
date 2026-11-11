@@ -1213,6 +1213,20 @@ document.addEventListener('visibilitychange', function(){
   if(changed){ render(); touch(); }
 });
 
+// Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
+const APP_VERSION = '4';
+function checkUpdate(){
+  fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+    if(!d || !d.v || d.v === APP_VERSION) return;
+    let done = ''; try{ done = sessionStorage.getItem('sw-reloaded') || ''; }catch(e){}
+    if(done === d.v) return;
+    try{ sessionStorage.setItem('sw-reloaded', d.v); }catch(e){}
+    toast('Nouvelle version, mise à jour…');
+    setTimeout(function(){ location.reload(); }, 900);
+  }).catch(function(){});
+}
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkUpdate(); });
+setTimeout(checkUpdate, 1500);
 render({enter:true});
 if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 })();
