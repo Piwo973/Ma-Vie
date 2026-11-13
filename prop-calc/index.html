@@ -256,6 +256,69 @@ tr.cur td{background:var(--accent-soft);color:var(--accent)}
 .modal{background:rgba(11,13,21,.96);border:1px solid rgba(57,255,159,.35);box-shadow:0 0 44px rgba(57,255,159,.18),0 24px 70px rgba(0,0,0,.7)}
 .modal-back{background:rgba(2,3,6,.72)}
 .toast{background:rgba(16,20,32,.94);color:var(--ink);border:1px solid rgba(34,230,255,.35);box-shadow:0 0 22px rgba(34,230,255,.25),0 8px 24px rgba(0,0,0,.4)}
+.col{display:flex;flex-direction:column;gap:10px}
+main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:6px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));background:rgba(5,6,10,.82);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);border-top:1px solid rgba(255,255,255,.07)}
+.bottomnav.hide{display:none}
+.bottomnav button{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;color:var(--muted);font:600 11.5px/1.2 var(--font-body);padding:7px 4px;border-radius:12px;cursor:pointer;transition:color .2s,background-color .2s,transform .1s}
+.bottomnav button:active{transform:scale(.94)}
+.bottomnav svg{width:24px;height:24px}
+.bottomnav button[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+.bottomnav button[aria-current="page"] svg{filter:drop-shadow(0 0 6px rgba(34,230,255,.75))}
+.toast{bottom:calc(98px + env(safe-area-inset-bottom))}
+.lead{font:500 17px/1.5 var(--font-body);margin:0}
+.lead b{color:var(--accent);font-weight:600}
+.lead-sm{font-size:15px;line-height:1.55;margin:0}
+.answer-cap{font:500 14px var(--font-body);color:var(--muted);align-self:flex-end;padding-bottom:8px}
+.trade-legs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.leg{border-radius:10px;padding:10px 12px;border:1px solid var(--line);border-left-width:4px;display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.02)}
+.leg.sl{border-left-color:var(--bad);box-shadow:-4px 0 14px -8px var(--bad)}
+.leg.tp{border-left-color:var(--good);box-shadow:-4px 0 14px -8px var(--good)}
+.leg .k{font-size:12.5px;color:var(--muted)}
+.leg .v{font:600 22px/1.15 var(--font-num)}
+.leg .s{font:500 12.5px var(--font-body);color:var(--muted)}
+.daybar{display:flex;flex-direction:column;gap:6px}
+.daybar-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--muted)}
+.daybar-top .pnl{font:600 22px var(--font-num);color:var(--ink)}
+details.more>summary{cursor:pointer;color:var(--accent);font:600 13.5px var(--font-body);list-style:none;padding:4px 0}
+details.more>summary::-webkit-details-marker{display:none}
+details.more[open]>summary{margin-bottom:8px}
+.setup-cta{border-color:rgba(34,230,255,.45);box-shadow:0 0 30px rgba(34,230,255,.14)}
+.setup-cta h2{color:var(--accent)}
+.btn.big{min-height:56px;font-size:16px;width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipbtn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:11px 16px;font:600 15px var(--font-num);cursor:pointer;min-width:56px;transition:background-color .2s,color .2s,box-shadow .2s,transform .1s}
+.chipbtn:active{transform:scale(.94)}
+.chipbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 16px rgba(34,230,255,.45)}
+.chipbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choice{display:flex;flex-direction:column;gap:10px}
+.choice .btn{text-align:left;padding:14px 16px;min-height:62px;font-size:16px}
+.choice .btn small{font:400 13px/1.35 var(--font-body);color:var(--muted);margin-top:3px}
+.choice .btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent),0 0 18px rgba(34,230,255,.25)}
+.choice .btn.blocked{text-decoration:line-through}
+.wiz{gap:16px}
+.wiz-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dots{display:flex;gap:6px}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:background-color .3s}
+.dots i.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.wiz .wiz-q{font:700 25px/1.2 var(--font-display);margin:0;color:var(--ink);text-transform:none;letter-spacing:.005em;text-wrap:balance}
+.preview{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:8px}
+.preview p{margin:0;font-size:14.5px;line-height:1.45}
+.badge{display:inline-flex;align-self:flex-start;font:700 13px/1 var(--font-display);letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px}
+.v-ok .badge{color:var(--good);background:var(--good-soft);box-shadow:0 0 14px rgba(57,255,159,.25)}
+.v-risky .badge{color:var(--warn);background:var(--warn-soft);box-shadow:0 0 14px rgba(255,184,77,.2)}
+.v-allin .badge,.v-impossible .badge{color:var(--bad);background:var(--bad-soft);box-shadow:0 0 14px rgba(255,61,139,.25)}
+.verdict.v-ok,.preview.v-ok{border-color:rgba(57,255,159,.35)}
+.verdict.v-risky,.preview.v-risky{border-color:rgba(255,184,77,.4)}
+.verdict.v-allin,.verdict.v-impossible,.preview.v-allin,.preview.v-impossible{border-color:rgba(255,61,139,.45)}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5}
+.steps li::marker{color:var(--accent);font-weight:700}
+.stepper-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:600 22px var(--font-num);cursor:pointer}
+.stepper button:disabled{opacity:.35;cursor:not-allowed}
+.stepper .n{font:600 22px var(--font-num);min-width:2.5ch;text-align:center}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -272,6 +335,7 @@ tr.cur td{background:var(--accent-soft);color:var(--accent)}
   </header>
   <main id="app"></main>
 </div>
+<nav id="nav" class="bottomnav" aria-label="Sections"></nav>
 
 <canvas id="fx" aria-hidden="true"></canvas>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -385,7 +449,7 @@ const PLANS = {
 };
 const PLAN_ORDER = ['apex50','lucid50pro','lucid50flex','tradeify100select','tradeify100growth','custom'];
 const RULE_KEYS = ['target','dd','dll','consistency','minDays','firmMax'];
-const PERSO = {method:'target', nR:9, nSL:3, fixedR:300, rr:1.5, persoCap:3, maxTrades:3, maxSLDay:3, daysGoal:3,
+const PERSO = {configured:false, v3:true, method:'plan', nR:9, nSL:3, fixedR:300, rr:1.5, persoCap:3, maxTrades:3, maxSLDay:3, daysGoal:3,
   und:'DOW', useMicro:false, autoTrail:true, goalMode:'validate', monthlyGoal:5000, tradingDays:20, tpPerDay:1};
 
 const nfCache = {};
@@ -399,8 +463,48 @@ function phaseOf(a){ const P = PLANS[a.plan] || PLANS.custom; return P.phases[a.
 function isEval(a){ return a.phase === 'eval'; }
 function isMonthly(a){ return a.goalMode === 'monthly'; }
 function dailyTargetOf(a){ return a.tradingDays > 0 ? a.monthlyGoal / a.tradingDays : NaN; }
+// Plan automatique : à partir de l'objectif (valider en N jours, ou X $ par mois), calcule le risque par trade,
+// le nombre de TP par jour et un verdict honnête.
+function riskCap(a){
+  const byDD = a.dd > 0 ? a.dd / 6 : Infinity;            // au moins 6 stops avant de perdre le compte
+  const byDLL = a.dll > 0 ? a.dll * 0.9 / 2 : Infinity;   // 2 stops par jour sans toucher la limite journalière
+  return Math.min(byDD, byDLL);
+}
+function minDaysOf(a){ const cons = a.consistency > 0 ? Math.ceil(100 / a.consistency - EPS) : 1; return Math.max(a.minDays || 1, cons); }
+function planCore(a, n){
+  const goal = isMonthly(a) ? a.monthlyGoal : a.target;
+  const D = goal / n;
+  const unit = riskCap(a) * a.rr;
+  const k = unit > 0 && D > 0 ? Math.max(1, Math.ceil(D / unit - EPS)) : NaN;
+  const R = k > 0 ? D / (k * a.rr) : NaN;
+  const M = Math.max(1, a.maxTrades || 1);
+  // Pertes possibles dans la journée tout en atteignant l'objectif du jour
+  const L = k <= M ? Math.floor((M - k) * a.rr / (1 + a.rr) + EPS) : 0;
+  const verdict = !(k > 0) || k > M ? 'impossible' : k === M ? 'allin' : L === 0 ? 'risky' : 'ok';
+  return {n:n, D:D, k:k, R:R, L:L, verdict:verdict};
+}
+function planFor(a){
+  const monthly = isMonthly(a);
+  const minD = minDaysOf(a);
+  const wanted = Math.max(1, Math.round(a.daysGoal || 1));
+  const n = monthly ? Math.max(1, Math.round(a.tradingDays || 20)) : Math.max(wanted, minD);
+  const p = planCore(a, n);
+  p.minDays = minD; p.raised = !monthly && wanted < minD; p.Rmax = riskCap(a);
+  if(!monthly){
+    for(let d = minD; d <= 30; d++){
+      const q = planCore(a, d);
+      if(!p.sugRisky && (q.verdict === 'risky' || q.verdict === 'ok')) p.sugRisky = {days:d, k:q.k, verdict:q.verdict};
+      if(q.verdict === 'ok'){ p.sugOk = {days:d, k:q.k, verdict:'ok'}; break; }
+    }
+  } else {
+    p.ddWarn = a.dd > 0 && a.monthlyGoal > a.dd * 1.5 + EPS;
+    p.safeMonth = Math.max(500, Math.round(a.dd / 500) * 500);
+    if(p.ddWarn && p.verdict === 'ok') p.verdict = 'oversize';
+  }
+  return p;
+}
 function riskUnit(a){
-  if(isMonthly(a)){ const d = dailyTargetOf(a); return d > 0 && a.tpPerDay > 0 && a.rr > 0 ? d / (a.tpPerDay * a.rr) : NaN; }
+  if(a.method === 'plan') return planFor(a).R;
   if(a.method === 'dd') return a.nSL > 0 ? a.dd / a.nSL : NaN;
   if(a.method === 'fixed') return a.fixedR > 0 ? a.fixedR : NaN;
   return a.nR > 0 ? a.target / a.nR : NaN;
@@ -440,13 +544,16 @@ function slMaxFor(risk, k, key){
 function compute(a){
   const R = riskUnit(a);
   const TP = R * a.rr;
+  const P = planFor(a);
   const monthly = isMonthly(a);
   const goal = a.size + a.target;
-  const dailyTarget = monthly ? dailyTargetOf(a) : NaN;
+  const dailyTarget = P.D;
   const monthPnl = a.monthPnl || 0;
   const remaining = monthly ? Math.max(0, a.monthlyGoal - monthPnl) : Math.max(0, goal - a.balance);
-  const dayDone = monthly && a.pnlToday >= dailyTarget - 0.5;
-  const dayTargetLeft = monthly ? Math.max(0, dailyTarget - a.pnlToday) : NaN;
+  const todayGoal = Math.max(0, Math.min(dailyTarget, remaining + a.pnlToday));
+  const dayDone = todayGoal > 0 && a.pnlToday >= todayGoal - 0.5;
+  const dayTargetLeft = Math.max(0, todayGoal - a.pnlToday);
+  const tpLeftToday = TP > 0 ? Math.ceil(dayTargetLeft / TP - EPS) : NaN;
   const monthDaysLeft = monthly ? Math.max(0, a.tradingDays - (a.monthDays || 0)) : NaN;
   const daysAtPlan = monthly && dailyTarget > 0 ? Math.ceil(remaining / dailyTarget - EPS) : NaN;
   const buffer = a.balance - a.threshold;
@@ -530,32 +637,24 @@ function compute(a){
   }
   const breakEven = 1 / (1 + a.rr);
 
-  // Statut
+  // Statut, en phrases simples
   let status;
-  if(!(R > 0)) status = {cls:'bad', label:'Réglage manquant', text:'Le calcul du R est incomplet. Ouvre les réglages du compte.'};
-  else if(buffer <= 0) status = {cls:'bad', label:'Compte cramé', text:'Ton solde est sous le seuil de liquidation.'};
-  else if(lossesLeft === 0) status = {cls:'bad', label:'Zone de liquidation', text:'Il te reste ' + money(buffer) + ' avant liquidation, moins de 1R. Ne trade plus ce compte avec ce risque.'};
-  else if(monthly && remaining <= 0) status = {cls:'good', label:'Objectif du mois atteint', text:'Tu as fait ' + money(monthPnl) + ' ce mois-ci. Plus de trade jusqu’au mois prochain.'};
-  else if(dayDone) status = {cls:'good', label:'Objectif du jour atteint', text:'+' + money(a.pnlToday) + ' aujourd’hui pour ' + money(dailyTarget) + ' prévus. Ferme la plateforme, on reprend demain.'};
-  else if(monthly && tradesLeft > 0 && slLeftToday > 0) {
-    const prudentM = lossesLeft <= 2;
-    status = {cls: prudentM ? 'warn' : 'good', label: prudentM ? 'Prudence' : 'Feu vert',
-      text:'Objectif du jour : encore ' + money(dayTargetLeft) + ' · 1R = ' + money(R) + ' · ' + pl(slLeftToday,'SL encaissable','SL encaissables') + ', ' + pl(tradesLeft,'trade','trades') + ' max.' +
-        (prudentM ? ' Plus que ' + pl(lossesLeft,'SL','SL') + ' avant liquidation.' : '')};
-  }
+  const prudent = lossesLeft <= 2;
+  if(!(R > 0)) status = {cls:'bad', label:'Plan à configurer', text:'Configure ton objectif : je calcule ton risque et tes contrats.'};
+  else if(buffer <= 0) status = {cls:'bad', label:'Compte perdu', text:'Ton solde est passé sous le seuil de liquidation.'};
+  else if(lossesLeft === 0) status = {cls:'bad', label:'Danger', text:'Il te reste ' + money(buffer) + ' avant de perdre le compte, moins qu’un stop. Ne trade plus ce compte comme ça.'};
+  else if(remaining <= 0 && monthly) status = {cls:'good', label:'Objectif du mois atteint', text:'Tu as fait ' + money(monthPnl) + ' ce mois-ci. Plus de trade jusqu’au mois prochain.'};
   else if(remaining <= 0) status = {cls:'good', label: isEval(a) ? 'Objectif atteint' : 'Objectif de retrait atteint',
-    text: isEval(a) ? (minDays > 1 ? 'Coupe tout. Vérifie que tu as bien ' + minDays + ' jours de trading avant la validation.' : 'Coupe tout et laisse la firm valider le compte.') : 'Vérifie les conditions de retrait (jours qualifiants, consistance) et demande ton payout.'};
-  else if(tradesLeft === 0) status = {cls:'warn', label:'Stop pour aujourd’hui', text:'Tes ' + pl(a.maxTrades,'trade est fait','trades sont faits') + '. Ferme la plateforme.'};
-  else if(slLeftToday === 0) status = {cls:'warn', label:'Stop pour aujourd’hui', text:'Ta limite de pertes du jour est atteinte. Plus aucun trade aujourd’hui.'};
-  else if(isFinite(consCap) && a.pnlToday >= consCap - EPS) status = {cls:'warn', label:'Journée bouclée', text:'Tu as atteint ' + money(consCap) + ', le plafond de la règle de consistance (' + a.consistency + ' %). Coupe pour aujourd’hui.'};
-  else {
-    const prudent = lossesLeft <= 2;
-    status = {cls: prudent ? 'warn' : 'good', label: prudent ? 'Prudence' : 'Feu vert',
-      text:'Encore ' + pl(tradesLeft,'trade','trades') + ' max aujourd’hui · 1R = ' + money(R) + ' · ' + pl(slLeftToday,'SL encaissable','SL encaissables') + ' aujourd’hui.' +
-        (prudent ? ' Plus que ' + pl(lossesLeft,'SL','SL') + ' avant liquidation.' : '')};
-  }
+    text: isEval(a) ? 'Bravo ! Ne trade plus ce compte et attends la validation de la firm.' + (minDays > 1 ? ' Vérifie que tu as bien ' + minDays + ' jours de trading.' : '') : 'Vérifie les conditions de retrait et demande ton payout.'};
+  else if(dayDone) status = {cls:'good', label:'Journée gagnée', text:'+' + money(a.pnlToday) + ' : objectif du jour atteint. Ferme la plateforme, on reprend demain.'};
+  else if(tradesLeft === 0) status = {cls:'warn', label:'Journée terminée', text:'Tu as pris tes ' + pl(a.maxTrades,'trade','trades') + ' du jour. Ferme la plateforme.'};
+  else if(slLeftToday === 0) status = {cls:'warn', label:'Journée terminée', text:'Tu as atteint ta limite de pertes du jour. Ferme la plateforme, on reprend demain.'};
+  else if(isFinite(consCap) && a.pnlToday >= consCap - EPS) status = {cls:'warn', label:'Journée terminée', text:'Tu as atteint ' + money(consCap) + ', le maximum par jour imposé par la firm (règle de consistance). Coupe pour aujourd’hui.'};
+  else status = {cls: prudent ? 'warn' : 'good', label: prudent ? 'Prudence' : 'Tu peux trader',
+    text:'Objectif du jour : encore ' + money(dayTargetLeft) + ' (' + pl(tpLeftToday,'TP','TP') + '). Tu peux encore perdre ' + pl(slLeftToday,'trade','trades') + ', ensuite tu arrêtes.' +
+      (prudent ? ' Attention : plus que ' + pl(lossesLeft,'stop','stops') + ' avant de perdre le compte.' : '')};
 
-  return {monthly:monthly, dailyTarget:dailyTarget, monthPnl:monthPnl, dayDone:dayDone, dayTargetLeft:dayTargetLeft, monthDaysLeft:monthDaysLeft,
+  return {plan:P, todayGoal:todayGoal, tpLeftToday:tpLeftToday, monthly:monthly, dailyTarget:dailyTarget, monthPnl:monthPnl, dayDone:dayDone, dayTargetLeft:dayTargetLeft, monthDaysLeft:monthDaysLeft,
     daysAtPlan:daysAtPlan, riskTooBig:riskTooBig, goalVsDD:goalVsDD,
     R:R, TP:TP, goal:goal, remaining:remaining, buffer:buffer, lossesLeft:lossesLeft, winsNeeded:winsNeeded,
     slLeftToday:slLeftToday, tradesLeft:tradesLeft, dllSafeSL:dllSafeSL, dllTight:dllTight, daySLMax:daySLMax, dayStop:dayStop,
@@ -638,6 +737,7 @@ let state = loadLocal() || defaultState();
 const ui = {adding:false, confirmDelete:false, settingsOpen:false};
 function normalize(){
   state.accounts.forEach(function(a){
+    if(!a.v3){ a.v3 = true; a.method = 'plan'; a.configured = !!a.validatedAt; }
     if(!PLANS[a.plan]) a.plan = 'custom';
     if(!PLANS[a.plan].phases[a.phase]) a.phase = 'eval';
     Object.keys(PERSO).forEach(function(k){ if(a[k] === undefined) a[k] = PERSO[k]; });
@@ -711,40 +811,50 @@ function cur(){ return state.accounts.find(function(a){ return a.id === state.se
 /* ---------- Rendu ---------- */
 const app = document.getElementById('app');
 const tabsEl = document.getElementById('tabs');
+const navEl = document.getElementById('nav');
+ui.tab = ui.tab || 'today';
 
+const ICONS = {
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22.5" y2="12"/></svg>',
+  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19l5-6 4 3 7-9"/><path d="M15 7h5v5"/></svg>',
+  account:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M16 15h2"/></svg>'
+};
+const VERDICT = {
+  ok:['Réaliste','v-ok'], risky:['Pas le droit à l’erreur','v-risky'], allin:['Quitte ou double','v-allin'], impossible:['Impossible','v-impossible'], oversize:['Trop gros pour ce compte','v-risky']
+};
+
+function renderNav(){
+  navEl.classList.toggle('hide', !!ui.wiz);
+  navEl.innerHTML = [['today','Aujourd’hui'],['plan','Mon plan'],['account','Compte']].map(function(t){
+    return '<button data-act="tab" data-k="' + t[0] + '"' + (ui.tab === t[0] ? ' aria-current="page"' : '') + '>' + ICONS[t[0]] + '<span>' + t[1] + '</span></button>';
+  }).join('');
+}
 function renderTabs(){
   tabsEl.innerHTML = state.accounts.map(function(a){
     const ph = phaseOf(a);
-    return '<button class="tab" role="tab" data-act="select" data-id="' + a.id + '" aria-selected="' + (a.id === state.selected && !ui.adding) + '">' + esc(a.name || 'Compte') + '<small>' + ph.label + '</small></button>';
-  }).join('') + '<button class="tab add" data-act="add" aria-selected="' + ui.adding + '">+ Compte</button>';
+    return '<button class="tab" role="tab" data-act="select" data-id="' + a.id + '" aria-selected="' + (a.id === state.selected && !(ui.wiz && ui.wiz.mode === 'new')) + '">' + esc(a.name || 'Compte') + '<small>' + ph.label + '</small></button>';
+  }).join('') + '<button class="tab add" data-act="add" aria-selected="' + !!(ui.wiz && ui.wiz.mode === 'new') + '">+ Compte</button>';
 }
 
+function field(label, f, val, opts){
+  opts = opts || {};
+  return '<div class="field' + (opts.full ? ' full' : '') + (opts.cls ? ' ' + opts.cls : '') + '"><label for="f-' + f + '">' + label + '</label>' +
+    '<input id="f-' + f + '" data-f="' + f + '" type="' + (opts.text ? 'text' : 'number') + '"' + (opts.text ? '' : ' inputmode="decimal" step="any"') + ' value="' + esc(val) + '">' +
+    (opts.hint ? '<span class="hint">' + opts.hint + '</span>' : '') + '</div>';
+}
+function tile(k, v, s, cls){ return '<div class="tile' + (cls ? ' ' + cls : '') + '"><span class="k">' + k + '</span><span class="v">' + v + '</span><span class="s">' + s + '</span></div>'; }
+
+function goalSentence(a){
+  const P = PLANS[a.plan] || PLANS.custom, U = UND[a.und] || UND.DOW;
+  const mk = 'sur le <b>' + U.label + '</b> en ' + (a.useMicro ? 'micro (' + U.micro + ')' : 'mini (' + U.mini + ')');
+  if(isMonthly(a)) return 'Gagner <b>' + money(a.monthlyGoal) + ' par mois</b> avec mon <b>' + esc(P.name) + '</b> financé, ' + mk + ', sur ' + a.tradingDays + ' jours de trading.';
+  return 'Valider mon <b>' + esc(P.name) + '</b> en <b>' + pl(a.daysGoal, 'jour', 'jours') + '</b>, ' + mk + '.';
+}
+
+/* ----- Onglet Aujourd'hui ----- */
 function statusHTML(a, c){
   return '<div class="label">' + c.status.label + '</div><div>' + c.status.text + '</div>' +
     (isEval(a) && c.remaining <= 0 && c.buffer > 0 ? '<button class="btn validate" data-act="validate-open">J’ai validé ce compte</button>' : '');
-}
-
-function slControlHTML(a){
-  const U = UND[a.und], v = a.sl[a.und];
-  return '<div class="field big full"><label for="f-sl">Mon stop loss (points)</label>' +
-    '<div class="sl-row"><button type="button" data-act="sl-dec" aria-label="Réduire le stop">−</button>' +
-    '<input id="f-sl" data-f="sl" type="number" inputmode="decimal" step="any" value="' + esc(v) + '">' +
-    '<button type="button" data-act="sl-inc" aria-label="Agrandir le stop">+</button></div>' +
-    '<input id="f-slr" data-f="sl" type="range" min="' + U.min + '" max="' + U.max + '" step="' + U.rstep + '" value="' + Math.min(U.max, Math.max(U.min, v)) + '" aria-label="Glisse pour régler ton stop">' +
-    '<div class="range-scale"><span>' + U.min + ' pts</span><span>glisse pour régler</span><span>' + U.max + ' pts</span></div></div>';
-}
-function vizHTML(a, c){
-  const total = c.capMainNow;
-  if(!(total > 0)) return '';
-  const nSlots = Math.min(total, 10);
-  const per = total / nSlots;
-  const on = Math.min(nSlots, Math.ceil(c.main.used / per - 1e-9));
-  const share = c.riskNext > 0 ? Math.min(100, c.main.risk / c.riskNext * 100) : 0;
-  let sl = '';
-  for(let i = 0; i < nSlots; i++) sl += '<span class="slot"></span>';
-  return '<div class="viz"><div class="slots" data-on="' + on + '" aria-hidden="true">' + sl + '</div>' +
-    '<div class="viz-label"><span>' + c.main.used + ' / ' + total + ' contrats max</span><span>risque utilisé ' + Math.round(share) + ' %</span></div>' +
-    '<div class="meter" role="img" aria-label="Part du risque autorisé utilisée"><i style="width:' + share.toFixed(1) + '%"></i></div></div>';
 }
 function heroSegHTML(a){
   let h = '<div class="seg c3" role="radiogroup" aria-label="Marché">' + UND_ORDER.map(function(k){
@@ -758,84 +868,68 @@ function heroSegHTML(a){
     '<button role="radio" data-act="size" data-k="micro" aria-checked="' + !!a.useMicro + '">Micro · ' + U.micro + '</button></div>';
   return h;
 }
-
-function heroOutHTML(a, c){
+function slControlHTML(a){
+  const U = UND[a.und], v = a.sl[a.und];
+  return '<div class="field big full"><label for="f-sl">La taille de ton stop, en points</label>' +
+    '<div class="sl-row"><button type="button" data-act="sl-dec" aria-label="Réduire le stop">−</button>' +
+    '<input id="f-sl" data-f="sl" type="number" inputmode="decimal" step="any" value="' + esc(v) + '">' +
+    '<button type="button" data-act="sl-inc" aria-label="Agrandir le stop">+</button></div>' +
+    '<input id="f-slr" data-f="sl" type="range" min="' + U.min + '" max="' + U.max + '" step="' + U.rstep + '" value="' + Math.min(U.max, Math.max(U.min, v)) + '" aria-label="Glisse pour régler ton stop">' +
+    '<div class="range-scale"><span>' + U.min + ' pts</span><span>glisse pour régler</span><span>' + U.max + ' pts</span></div></div>';
+}
+function vizHTML(a, c){
+  const total = c.capMainNow;
+  if(!(total > 0)) return '';
+  const nSlots = Math.min(total, 10), per = total / nSlots;
+  const on = Math.min(nSlots, Math.ceil(c.main.used / per - 1e-9));
+  const share = c.riskNext > 0 ? Math.min(100, c.main.risk / c.riskNext * 100) : 0;
+  let sl = '';
+  for(let i = 0; i < nSlots; i++) sl += '<span class="slot"></span>';
+  return '<div class="viz"><div class="slots" data-on="' + on + '" aria-hidden="true">' + sl + '</div>' +
+    '<div class="viz-label"><span>' + c.main.used + ' sur ' + total + ' max</span><span>risque utilisé ' + Math.round(share) + ' %</span></div>' +
+    '<div class="meter" role="img" aria-label="Part du risque autorisé utilisée"><i style="width:' + share.toFixed(1) + '%"></i></div></div>';
+}
+function tradeOutHTML(a, c){
   const I = INSTR[c.keyMain], J = INSTR[c.keyAlt];
-  const reasons = {R:'Le calcul du R est incomplet : ouvre les réglages.', blown:'Compte sous le seuil de liquidation.',
-    done:'Objectif atteint : plus de trade à prendre.',
+  const reasons = {R:'Ton plan n’est pas encore calculé : configure ton objectif.', blown:'Ton compte est passé sous le seuil de liquidation.',
+    done:'Objectif atteint : ne trade plus ce compte, attends la validation.',
     monthDone:'Objectif du mois atteint : plus de trade jusqu’au mois prochain.',
-    dayDone:'Objectif du jour atteint (' + money(c.dailyTarget) + ') : stop pour aujourd’hui.',
-    dd:'Moins de 1R avant le seuil de liquidation : plus de trade sur ce compte à ce risque.', metal:'Pas d’or sur ce compte : Apex a suspendu tous les métaux (GC, MGC) depuis mars 2026.',
-    trades:'Stop pour aujourd’hui : tes ' + a.maxTrades + ' trades sont faits.', sl:'Stop pour aujourd’hui : ta limite de pertes du jour est atteinte.',
+    dayDone:'Objectif du jour atteint : on ne trade plus aujourd’hui.',
+    dd:'Il te reste moins d’un stop avant de perdre le compte : ne trade plus ce compte comme ça.', metal:'Pas d’or chez Apex : la firm a suspendu tous les métaux (GC, MGC) depuis mars 2026.',
+    trades:'Tu as pris tes ' + a.maxTrades + ' trades du jour. On reprend demain.', sl:'Ta limite de pertes du jour est atteinte. On reprend demain.',
     cap:'Aucun contrat autorisé : vérifie tes limites de contrats.'};
   if(c.block){
     return '<div class="answer"><span class="bignum zero">0</span><span class="unit">' + I.label + '</span></div>' +
       '<p class="alert ' + (/done|Done/.test(c.block) ? 'warn' : 'bad') + '">' + reasons[c.block] + '</p>';
   }
-  if(!(c.sl > 0)) return '<p class="note">Entre la distance de ton stop loss en points.</p>';
-  let h = '<div class="answer"><span class="bignum' + (c.main.used === 0 ? ' zero' : '') + '">' + c.main.used + '</span><span class="unit">' + I.label + '</span></div>';
+  if(!(c.sl > 0)) return '<p class="note">Règle la taille de ton stop en points.</p>';
+  let h = '<div class="answer"><span class="bignum' + (c.main.used === 0 ? ' zero' : '') + '">' + c.main.used + '</span><span class="unit">' + I.label + '</span><span class="answer-cap">' + (c.main.used > 1 ? 'contrats à prendre' : 'contrat à prendre') + '</span></div>';
   if(c.main.used > 0){
-    h += '<p class="answer-sub">Risque <b>' + money(-c.main.risk) + '</b> · TP à <b>' + num(c.tpPts, 2) + ' pts</b> (+' + money(c.tpGain) + ')</p>';
+    h += '<div class="trade-legs">' +
+      '<div class="leg sl"><span class="k">Ton stop</span><span class="v">' + num(c.sl, I.dec) + ' pts</span><span class="s">si touché : −' + money(c.main.risk) + '</span></div>' +
+      '<div class="leg tp"><span class="k">Ton objectif (TP)</span><span class="v">' + num(c.tpPts, 2) + ' pts</span><span class="s">si touché : +' + money(c.tpGain) + '</span></div></div>';
   } else {
-    h += '<p class="alert bad">SL trop large : 1 ' + I.label + ' risquerait ' + money(c.sl * I.pv) + ', plus que ton risque autorisé de ' + money(c.riskNext) + '.' +
-      (c.alt.used > 0 ? ' Passe en ' + J.label + ' : <b>' + c.alt.used + '</b>.' : ' Réduis ton stop.') + '</p>';
+    h += '<p class="alert bad">Stop trop grand : même 1 ' + I.label + ' te ferait perdre ' + money(c.sl * I.pv) + ', plus que les ' + money(c.riskNext) + ' autorisés.' +
+      (c.alt.used > 0 ? ' Prends plutôt <b>' + c.alt.used + ' ' + J.label + '</b>.' : ' Réduis ton stop.') + '</p>';
   }
   h += vizHTML(a, c);
-  if(c.alt.used > 0 && c.main.used > 0) h += '<p class="note">ou ' + c.alt.used + ' ' + J.label + ' (risque ' + money(-c.alt.risk) + ')</p>';
+  if(c.alt.used > 0 && c.main.used > 0) h += '<p class="note">En ' + (J.micro ? 'micro' : 'mini') + ' : ' + c.alt.used + ' ' + J.label + ' (−' + money(c.alt.risk) + ' si le stop est touché).</p>';
   if(c.main.capped){
-    const lim = c.capLimiter === 'perso' ? 'ta règle de ' + pl(c.persoCap,'contrat','contrats') : 'la firm (' + pl(c.firm.cap,'mini','minis') + (c.firm.tier ? ' à ton palier actuel' : '') + ')';
-    h += '<span class="limit">Plafonné par ' + lim + (I.micro ? ' = ' + c.capMainNow + ' micros' : '') + '</span>';
+    const lim = c.capLimiter === 'perso' ? 'ta règle de ' + pl(c.persoCap,'contrat','contrats') + ' max' : 'la limite de la firm (' + pl(c.firm.cap,'mini','minis') + (c.firm.tier ? ' à ton palier actuel' : '') + ')';
+    h += '<span class="limit">Bloqué par ' + lim + '</span>';
   } else if(c.main.used > 0){
-    h += '<span class="limit">Limité par ton risque : ' + money(c.riskNext) + (c.riskNext < c.R - 0.5 ? ' (réduit)' : ' = 1R') + '</span>';
+    h += '<span class="limit">Calculé pour perdre au maximum ' + money(c.riskNext) + ' par trade</span>';
   }
-  if(c.riskReason === 'dll') h += '<p class="alert warn">Risque réduit à ' + money(c.riskNext) + ' pour ne pas toucher la limite journalière (marge de 10 % pour le slippage).</p>';
+  if(c.riskReason === 'dll') h += '<p class="alert warn">Risque réduit à ' + money(c.riskNext) + ' pour ne pas toucher la limite de perte journalière de la firm.</p>';
   if(c.riskReason === 'dd') h += '<p class="alert warn">Risque réduit à ' + money(c.riskNext) + ' : tu es proche du seuil de liquidation.</p>';
   if(c.rows.length){
-    h += '<div class="tablewrap"><table><thead><tr><th>' + I.label + '</th><th>SL max</th><th>TP à ' + num(a.rr, 2) + 'R</th></tr></thead><tbody>' +
+    h += '<details class="more"><summary>Voir le tableau stop / contrats</summary><div class="tablewrap"><table><thead><tr><th>' + I.label + '</th><th>Stop max</th><th>Objectif</th></tr></thead><tbody>' +
       c.rows.map(function(r){
         return '<tr' + (r.k === c.main.used ? ' class="cur"' : '') + '><td>' + r.k + '</td><td>' + (r.sl > 0 ? num(r.sl, I.dec) + ' pts' : '—') + '</td><td>' + (r.sl > 0 ? num(r.sl * a.rr, 2) + ' pts' : '—') + '</td></tr>';
-      }).join('') + '</tbody></table></div>';
-    h += '<p class="note">1 point ' + I.label + ' = ' + num(I.pv, 2) + ' $ par contrat. Le tableau donne le stop maximum pour rester à ' + money(c.riskNext) + ' de risque.</p>';
+      }).join('') + '</tbody></table></div><p class="note">1 point ' + I.label + ' = ' + num(I.pv, 2) + ' $ par contrat.</p></details>';
   }
   return h;
 }
-
-function planHTML(a, c){
-  let h;
-  if(c.monthly){
-    h = '<div class="tiles">' +
-      '<div class="tile"><span class="k">Objectif du mois</span><span class="v">' + money(a.monthlyGoal) + '</span><span class="s">' + pl(a.tradingDays,'jour','jours') + ' de trading</span></div>' +
-      '<div class="tile"><span class="k">Objectif par jour</span><span class="v">' + money(c.dailyTarget) + '</span><span class="s">' + pl(a.tpPerDay,'TP','TP') + ' à ' + num(a.rr, 2) + 'R, puis stop</span></div>' +
-      '<div class="tile"><span class="k">1R (ton stop)</span><span class="v">' + money(c.R) + '</span><span class="s">TP = ' + money(c.TP) + '</span></div></div>' +
-      '<p class="note">Chaque jour : <b>' + pl(a.tpPerDay,'TP','TP') + '</b> à ' + money(c.TP) + ' et tu coupes · <b>' + pl(c.daySLMax,'SL','SL') + ' max</b> (' + money(c.dayStop) + ') · ' + pl(a.maxTrades,'trade','trades') + ' max. Le risque ne monte jamais pour rattraper un retard.</p>';
-    if(c.goalVsDD > 1.5 - EPS) h += '<p class="alert warn">' + money(a.monthlyGoal) + ' par mois, c’est ' + num(c.goalVsDD, 1) + ' fois ton drawdown (' + money(a.dd) + '). Une mauvaise semaine peut cramer le compte avant la fin du mois. Vérifie aussi le plafond de retrait de ta firm.</p>';
-  } else {
-    h = '<div class="tiles">' +
-      '<div class="tile"><span class="k">Objectif</span><span class="v">' + money(a.target) + '</span><span class="s">' + (a.method === 'target' ? a.nR + ' R' : num(a.target / c.R, 1) + ' R') + '</span></div>' +
-      '<div class="tile"><span class="k">1R (ton stop)</span><span class="v">' + money(c.R) + '</span><span class="s">TP = ' + money(c.TP) + '</span></div>' +
-      '<div class="tile"><span class="k">TP nets pour valider</span><span class="v">' + (isFinite(c.winsNeeded) ? c.winsNeeded : '—') + '</span><span class="s">sans SL en route</span></div></div>' +
-      '<p class="note">Par jour : <b>' + pl(c.daySLMax,'SL','SL') + ' max</b> (' + money(c.dayStop) + ') · ' + pl(a.maxTrades,'trade','trades') + ' max.</p>';
-  }
-  if(c.riskTooBig) h += '<p class="alert warn">1R = ' + money(c.R) + ', soit plus de 20 % de ton drawdown : 5 SL et le compte est cramé.</p>';
-  return h;
-}
-
-function todayOutHTML(a, c){
-  const consTile = c.monthly
-    ? '<div class="tile' + (c.dayDone ? ' good' : '') + '"><span class="k">Objectif du jour restant</span><span class="v">' + money(c.dayTargetLeft) + '</span><span class="s">sur ' + money(c.dailyTarget) + '</span></div>'
-    : isFinite(c.consCap)
-    ? '<div class="tile' + (c.consLeftToday <= 0 ? ' warn' : '') + '"><span class="k">Gain max encore permis</span><span class="v">' + money(c.consLeftToday) + '</span><span class="s">consistance ' + a.consistency + ' %</span></div>'
-    : '<div class="tile"><span class="k">Gain max encore permis</span><span class="v">Libre</span><span class="s">pas de consistance</span></div>';
-  return '<div class="tiles">' +
-    '<div class="tile' + (c.tradesLeft === 0 ? ' warn' : '') + '"><span class="k">Trades restants</span><span class="v">' + c.tradesLeft + '</span><span class="s">sur ' + a.maxTrades + ' par jour</span></div>' +
-    '<div class="tile' + (c.slLeftToday === 0 ? ' bad' : c.slLeftToday === 1 ? ' warn' : '') + '"><span class="k">SL encaissables aujourd’hui</span><span class="v">' + c.slLeftToday + '</span><span class="s">= ' + money(c.slLeftToday * c.R) + '</span></div>' +
-    consTile + '</div>' +
-    '<div class="actions">' +
-    '<button class="btn good" data-act="log-tp">TP touché<small>+' + money(c.TP) + '</small></button>' +
-    '<button class="btn bad" data-act="log-sl">SL touché<small>' + money(-c.R) + '</small></button>' +
-    '<button class="btn" data-act="log-be">BE<small>0 $</small></button></div>';
-}
-
 function logHTML(a){
   if(!a.log.length) return '<p class="note">Aucun trade enregistré aujourd’hui.</p>';
   return '<ul class="log">' + a.log.map(function(e){
@@ -843,121 +937,148 @@ function logHTML(a){
     return '<li class="chip ' + cls + '">' + esc(e.t) + ' ' + (e.v > 0 ? '+' : '') + money(e.v) + '</li>';
   }).join('') + '<li><button class="linkbtn" data-act="undo">Annuler le dernier</button></li></ul>';
 }
-
-function todayAlertsHTML(a, c){
-  let out = '';
-  if(c.dllTight) out += '<p class="alert warn">Ton ' + a.maxSLDay + '<sup>e</sup> SL de ' + money(c.R) + ' touche la limite journalière de ' + money(a.dll) + ' : au moindre slippage, elle saute. L’app te limite à <b>' + pl(c.dllSafeSL,'SL','SL') + ' par jour</b> sur ce compte.</p>';
-  if(c.dayStopShare >= 0.5 - EPS && c.R > 0) out += '<p class="alert warn">Une journée à ' + pl(c.daySLMax,'SL','SL') + ' = ' + money(c.dayStop) + ', soit ' + pct(c.dayStopShare) + ' de ton drawdown. <b>' + pl(c.badDaysToBlow,'mauvaise journée suffit','mauvaises journées suffisent') + '</b> à cramer le compte.</p>';
-  return out;
+function dayOutHTML(a, c){
+  const goal = c.todayGoal, done = Math.max(0, a.pnlToday);
+  const fill = goal > 0 ? Math.min(100, done / goal * 100) : 0;
+  return '<div class="daybar"><div class="daybar-top"><span class="pnl">' + (a.pnlToday > 0 ? '+' : '') + money(a.pnlToday) + '</span><span>objectif du jour : ' + money(goal) + '</span></div>' +
+      '<div class="bar" role="img" aria-label="Progression de l’objectif du jour"><i style="width:' + fill.toFixed(1) + '%"></i></div></div>' +
+    '<div class="tiles">' +
+      tile('Encore à gagner', money(c.dayTargetLeft), c.dayTargetLeft > 0 ? 'soit ' + pl(c.tpLeftToday,'TP','TP') : 'c’est fait', c.dayTargetLeft <= 0 ? 'good' : '') +
+      tile('Pertes encore permises', c.slLeftToday, c.slLeftToday > 0 ? 'puis tu arrêtes' : 'on arrête', c.slLeftToday === 0 ? 'bad' : c.slLeftToday === 1 ? 'warn' : '') +
+      tile('Trades restants', c.tradesLeft, 'sur ' + a.maxTrades + ' par jour', c.tradesLeft === 0 ? 'warn' : '') +
+    '</div>' +
+    '<div class="actions">' +
+      '<button class="btn good" data-act="log-tp">TP touché<small>+' + money(c.TP) + '</small></button>' +
+      '<button class="btn bad" data-act="log-sl">Stop touché<small>' + money(-c.R) + '</small></button>' +
+      '<button class="btn" data-act="log-be">À zéro<small>0 $</small></button></div>' +
+    '<div id="o-log">' + logHTML(a) + '</div>';
 }
-
-function paceHTML(a, c){
-  if(c.remaining <= 0 || !(c.R > 0)) return '';
-  if(c.monthly){
-    let m = '<p class="note">Reste <b>' + money(c.remaining) + '</b> ce mois-ci, soit ' + pl(c.daysAtPlan,'jour','jours') + ' au rythme du plan. Jours de trading restants prévus : ' + c.monthDaysLeft + '.</p>';
-    if(c.daysAtPlan > c.monthDaysLeft) m += '<p class="alert warn">Tu es en retard sur le plan. L’app ne monte pas le risque pour rattraper : accepte un mois plus court plutôt que de forcer.</p>';
-    return m;
-  }
-  let s = '<p class="note">Rythme pour finir en ' + pl(c.days,'jour','jours') + ' : <b>' + money(c.pace) + '</b> par jour ≈ ' + num(c.pace / c.R, 1) + ' R ≈ ' + pl(c.paceTP,'TP','TP') + '.</p>';
-  if(c.paceTooFast) s += '<p class="alert warn">Trop rapide pour la consistance à ' + a.consistency + ' % : vise au moins <b>' + pl(c.daysForCons,'jour','jours') + '</b>.</p>';
-  else if(c.days < c.minDays) s += '<p class="alert warn">Il faut au moins <b>' + pl(c.minDays,'jour','jours') + '</b> de trading ici.</p>';
-  return s;
-}
-
-function rulesHTML(a, c){
-  const P = PLANS[a.plan] || PLANS.custom;
-  const ph = phaseOf(a);
-  let h = '<span class="phase-chip">' + esc(P.name) + ' · ' + ph.label + '</span><ul class="rules">' + ph.rules.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
-  const f = c.firm;
-  h += '<p class="note">Contrats autorisés maintenant : <b>' + pl(c.capMini,'mini','minis') + '</b> (' + (c.capLimiter === 'perso' ? 'ta règle perso' : 'limite firm') + ')' +
-    (f.next ? ' · palier suivant : ' + pl(f.next.m,'mini','minis') + ' à +' + money(f.next.p) + ' de profit' : '') + '.</p>';
-  h += '<p class="note">Vérifié le ' + VERIFIED + (P.source ? ' · <a href="' + P.source + '" target="_blank" rel="noopener">source</a>' : '') + '. Si ton compte a d’autres règles (option achetée, ancien contrat), corrige-les dans les réglages.</p>';
+function todayTabHTML(a, c){
+  let h = '';
+  if(!a.configured) h += '<section class="panel setup-cta"><h2>Configure ce compte</h2><p class="lead">Dis-moi ce que tu veux faire avec ce compte, je calcule tout : risque, contrats, objectif du jour.</p><button class="btn primary big" data-act="wiz-open">Commencer (30 secondes)</button></section>';
+  h += '<section class="status ' + c.status.cls + '" id="o-status" aria-live="polite">' + statusHTML(a, c) + '</section>';
+  h += '<section class="panel hero"><h2>Ton prochain trade</h2>' + heroSegHTML(a) + slControlHTML(a) + '<div id="o-trade" class="col">' + tradeOutHTML(a, c) + '</div></section>';
+  h += '<section class="panel"><h2>Ta journée</h2><div id="o-day" class="col">' + dayOutHTML(a, c) + '</div>' +
+    '<details class="more"><summary>Résultat différent (partiel, sortie manuelle…)</summary><div class="inline">' + field('Montant en $ (négatif si perte)', 'customPnl', '') + '<button class="btn primary" data-act="log-custom">Ajouter</button></div></details></section>';
   return h;
 }
 
+/* ----- Onglet Mon plan ----- */
+function verdictHTML(a, p){
+  const V = VERDICT[p.verdict] || VERDICT.ok;
+  const goalTxt = isMonthly(a) ? money(a.monthlyGoal) + ' par mois' : money(a.target) + ' en ' + pl(p.n,'jour','jours');
+  let t = 'Pour faire ' + goalTxt + ', il faut <b>' + money(p.D) + ' par jour</b>. Avec un risque raisonnable de ' + money(p.R) + ' par trade, ça fait <b>' + pl(p.k,'TP','TP') + ' par jour</b> sur ' + pl(a.maxTrades,'trade','trades') + ' maximum. ';
+  if(p.verdict === 'ok') t += 'Tu peux perdre ' + pl(p.L,'trade','trades') + ' dans la journée et quand même atteindre ton objectif.';
+  else if(p.verdict === 'risky') t += 'Un seul trade perdant et ton objectif du jour est raté.';
+  else if(p.verdict === 'allin') t += 'Il faut gagner tous tes trades, tous les jours.';
+  else if(p.verdict === 'oversize') t += 'Au jour le jour c’est faisable, mais sur un mois c’est trop gros pour la taille de ton compte.';
+  else t += 'Il faudrait plus de TP que de trades autorisés.';
+  let h = '<span class="badge">' + V[0] + '</span><p class="lead-sm">' + t + '</p>';
+  if(p.ddWarn) h += '<p class="alert warn">' + money(a.monthlyGoal) + ' par mois, c’est ' + num(a.monthlyGoal / a.dd, 1) + ' fois ton drawdown (' + money(a.dd) + ') : une mauvaise semaine peut effacer le compte. Plus sûr : ' + money(p.safeMonth) + ' par mois.</p>';
+  if(p.raised) h += '<p class="note">Ce compte impose au moins ' + pl(p.minDays,'jour','jours') + ' de trading (règle de la firm) : le plan est calculé sur ' + pl(p.n,'jour','jours') + '.</p>';
+  const sug = [];
+  if(!isMonthly(a)){
+    if(p.sugRisky && p.verdict !== 'risky' && p.verdict !== 'ok' && p.sugRisky.days !== p.n) sug.push(p.sugRisky);
+    if(p.sugOk && p.verdict !== 'ok') sug.push(p.sugOk);
+    if(sug.length) h += '<p class="note">Plus réaliste :</p><div class="choice">' + sug.map(function(s){
+      return '<button class="btn" data-act="set-days" data-k="' + s.days + '">Valider en ' + pl(s.days,'jour','jours') + '<small>' + pl(s.k,'TP','TP') + ' par jour · ' + VERDICT[s.verdict][0].toLowerCase() + '</small></button>';
+    }).join('') + '</div>';
+  } else if(p.ddWarn){
+    h += '<div class="choice"><button class="btn" data-act="set-month" data-k="' + p.safeMonth + '">Passer à ' + money(p.safeMonth) + ' par mois<small>un objectif à la taille de ton compte</small></button></div>';
+  }
+  return h;
+}
+function planStepsHTML(a, c, p){
+  const items = [
+    '<b>Objectif du jour : ' + money(p.D) + '</b>, soit ' + pl(p.k,'TP','TP') + '. Dès qu’il est atteint, tu arrêtes.',
+    '<b>Risque par trade : ' + money(c.R) + '</b>. C’est ce que tu perds si ton stop est touché. On l’appelle « 1R ».',
+    '<b>Gain par TP : ' + money(c.TP) + '</b>, soit ' + num(a.rr, 2) + ' fois ton risque.',
+    '<b>Stop de la journée</b> : ' + pl(c.daySLMax,'trade perdant','trades perdants') + ' (' + money(c.dayStop) + ') ou ' + pl(a.maxTrades,'trade pris','trades pris') + '.',
+    '<b>Nombre de contrats</b> : il dépend de ton stop. Dans « Aujourd’hui », règle ton stop et l’appli te donne le nombre exact.',
+    isMonthly(a) ? 'Sur le mois : ' + a.tradingDays + ' jours × ' + money(p.D) + ' = ' + money(a.monthlyGoal) + '. Un jour raté ? On ne rattrape pas en risquant plus.'
+      : 'Validation prévue en ' + pl(p.n,'jour','jours') + ' de trading. Un jour raté ? On ne rattrape pas en risquant plus : on ajoute un jour.'
+  ];
+  let h = '<ol class="steps">' + items.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ol>';
+  if(c.dllTight) h += '<p class="note">Avec ' + money(c.R) + ' de risque, ' + pl(a.maxSLDay,'perte','pertes') + ' toucheraient la limite journalière de la firm (' + money(a.dll) + ') : l’appli t’arrête donc à ' + pl(c.dllSafeSL,'perte','pertes') + ' par jour.</p>';
+  return h;
+}
+function rulesHTML(a, c){
+  const P = PLANS[a.plan] || PLANS.custom, ph = phaseOf(a), f = c.firm;
+  return '<ul class="rules">' + ph.rules.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
+    '<p class="note">Contrats autorisés maintenant : <b>' + pl(c.capMini,'mini','minis') + '</b>' + (f.next ? ' (palier suivant : ' + pl(f.next.m,'mini','minis') + ' à +' + money(f.next.p) + ' de profit)' : '') + '.</p>' +
+    '<p class="note">Vérifié le ' + VERIFIED + (P.source ? ' · <a href="' + P.source + '" target="_blank" rel="noopener">source</a>' : '') + '.</p>';
+}
+function planTabHTML(a, c, p){
+  if(!a.configured) return '<section class="panel setup-cta"><h2>Pas encore de plan</h2><p class="lead">Réponds à 5 questions simples et je te calcule ton plan complet.</p><button class="btn primary big" data-act="wiz-open">Calculer mon plan</button></section>';
+  const V = VERDICT[p.verdict] || VERDICT.ok;
+  return '<section class="panel"><h2>Mon objectif</h2><p class="lead">' + goalSentence(a) + '</p><button class="btn ghost" data-act="wiz-open">Modifier mon objectif</button></section>' +
+    '<section class="panel verdict ' + V[1] + '" id="o-verdict"><h2>Est-ce réaliste ?</h2>' + verdictHTML(a, p) + '</section>' +
+    '<section class="panel"><h2>Mon plan, chaque jour</h2><div id="o-steps">' + planStepsHTML(a, c, p) + '</div></section>' +
+    '<section class="panel"><h2>Les règles de ' + esc((PLANS[a.plan] || PLANS.custom).name) + ' (' + phaseOf(a).label.toLowerCase() + ')</h2><div id="o-rules" class="col">' + rulesHTML(a, c) + '</div></section>';
+}
+
+/* ----- Onglet Compte ----- */
 function progressOutHTML(a, c){
   if(c.monthly){
     const fillM = a.monthlyGoal > 0 ? Math.min(100, Math.max(0, c.monthPnl / a.monthlyGoal * 100)) : 0;
     return '<div class="tiles">' +
-      '<div class="tile' + (c.remaining <= 0 ? ' good' : '') + '"><span class="k">Ce mois-ci</span><span class="v">' + (c.monthPnl > 0 ? '+' : '') + money(c.monthPnl) + '</span><span class="s">' + pl(a.monthDays || 0,'jour tradé','jours tradés') + '</span></div>' +
-      '<div class="tile' + (c.lossesLeft <= 1 ? ' bad' : c.lossesLeft <= 2 ? ' warn' : '') + '"><span class="k">Marge avant liquidation</span><span class="v">' + money(c.buffer) + '</span><span class="s">' + pl(c.lossesLeft,'SL','SL') + ' avant de cramer</span></div>' +
-      '<div class="tile"><span class="k">Reste ce mois</span><span class="v">' + money(c.remaining) + '</span><span class="s">' + pl(c.winsNeeded,'TP','TP') + ' nets</span></div></div>' +
+      tile('Ce mois-ci', (c.monthPnl > 0 ? '+' : '') + money(c.monthPnl), pl(a.monthDays || 0,'jour tradé','jours tradés'), c.remaining <= 0 ? 'good' : '') +
+      tile('Reste ce mois', money(c.remaining), 'soit ' + pl(c.winsNeeded,'TP','TP')) +
+      tile('Avant de perdre le compte', money(c.buffer), pl(c.lossesLeft,'stop','stops') + ' possibles', c.lossesLeft <= 1 ? 'bad' : c.lossesLeft <= 2 ? 'warn' : '') + '</div>' +
       '<div class="bar" role="img" aria-label="Progression de l’objectif du mois"><i style="width:' + fillM.toFixed(1) + '%"></i></div>' +
       '<div class="barlabels"><span>0 $</span><span>Objectif ' + money(a.monthlyGoal) + '</span></div>';
   }
   const span = c.goal - a.threshold;
   const fill = span > 0 ? Math.min(100, Math.max(0, (a.balance - a.threshold) / span * 100)) : 0;
   return '<div class="tiles">' +
-    '<div class="tile' + (c.remaining <= 0 ? ' good' : '') + '"><span class="k">Reste à faire</span><span class="v">' + money(c.remaining) + '</span><span class="s">' + num(c.remaining / c.R, 1) + ' R · ' + pl(c.winsNeeded,'TP','TP') + '</span></div>' +
-    '<div class="tile' + (c.lossesLeft <= 1 ? ' bad' : c.lossesLeft <= 2 ? ' warn' : '') + '"><span class="k">Marge avant liquidation</span><span class="v">' + money(c.buffer) + '</span><span class="s">' + pl(c.lossesLeft,'SL','SL') + ' avant de cramer</span></div>' +
-    '<div class="tile"><span class="k">1R</span><span class="v">' + money(c.R) + '</span><span class="s">TP ' + money(c.TP) + ' (1:' + num(a.rr, 2) + ')</span></div></div>' +
+    tile('Reste à faire', money(c.remaining), 'soit ' + pl(c.winsNeeded,'TP','TP'), c.remaining <= 0 ? 'good' : '') +
+    tile('Avant de perdre le compte', money(c.buffer), pl(c.lossesLeft,'stop','stops') + ' possibles', c.lossesLeft <= 1 ? 'bad' : c.lossesLeft <= 2 ? 'warn' : '') +
+    tile('Ton risque (1R)', money(c.R), 'TP = ' + money(c.TP)) + '</div>' +
     '<div class="bar" role="img" aria-label="Progression entre le seuil de liquidation et l’objectif"><i style="width:' + fill.toFixed(1) + '%"></i></div>' +
-    '<div class="barlabels"><span>Liquidation ' + money(a.threshold) + '</span><span>Objectif ' + money(c.goal) + '</span></div>';
+    '<div class="barlabels"><span>Compte perdu à ' + money(a.threshold) + '</span><span>Validé à ' + money(c.goal) + '</span></div>';
 }
-
 function scenHTML(a, c){
   if(c.remaining <= 0) return '<p class="note">Objectif atteint, plus rien à calculer.</p>';
-  if(!c.scen.length) return '<p class="note">Plus aucune perte possible avant liquidation.</p>';
-  return '<p class="note">' + (c.monthly ? 'Pour finir le mois : ' : '') + 'TP à ' + num(a.rr, 2) + 'R nécessaires selon le nombre de SL pris en route. À 1:' + num(a.rr, 2) + ', tu es rentable au-dessus de ' + pct(c.breakEven) + ' de réussite.</p>' +
-    '<div class="tablewrap"><table><thead><tr><th>SL pris</th><th>TP nécessaires</th><th>Trades au total</th><th>Réussite nécessaire</th></tr></thead><tbody>' +
+  if(!c.scen.length) return '<p class="note">Plus aucune perte possible avant de perdre le compte.</p>';
+  return '<p class="note">Combien de TP il te faut ' + (c.monthly ? 'pour finir le mois' : 'pour valider') + ', selon le nombre de stops pris en route.</p>' +
+    '<div class="tablewrap"><table><thead><tr><th>Stops pris</th><th>TP nécessaires</th><th>Trades au total</th><th>Réussite nécessaire</th></tr></thead><tbody>' +
     c.scen.map(function(s){
       const cls = s.rate >= 0.7 ? 'rate-bad' : s.rate >= 0.55 ? 'rate-warn' : 'rate-good';
       return '<tr><td>' + s.k + '</td><td>' + s.w + '</td><td>' + s.total + '</td><td class="' + cls + '">' + pct(s.rate) + '</td></tr>';
-    }).join('') + '</tbody></table></div>';
+    }).join('') + '</tbody></table></div>' +
+    '<p class="note">Avec un TP à ' + num(a.rr, 2) + ' fois ton risque, tu gagnes de l’argent dès ' + pct(c.breakEven) + ' de trades gagnants.</p>';
 }
-
-function field(label, f, val, opts){
-  opts = opts || {};
-  return '<div class="field' + (opts.full ? ' full' : '') + (opts.cls ? ' ' + opts.cls : '') + '"><label for="f-' + f + '">' + label + '</label>' +
-    '<input id="f-' + f + '" data-f="' + f + '" type="' + (opts.text ? 'text' : 'number') + '"' + (opts.text ? '' : ' inputmode="decimal" step="any"') + ' value="' + esc(val) + '">' +
-    (opts.hint ? '<span class="hint">' + opts.hint + '</span>' : '') + '</div>';
-}
-
 function settingsHTML(a){
-  const P = PLANS[a.plan] || PLANS.custom;
-  const planOpts = PLAN_ORDER.map(function(k){ return '<option value="' + k + '"' + (a.plan === k ? ' selected' : '') + '>' + esc(PLANS[k].name) + '</option>'; }).join('');
-  const phaseOpts = Object.keys(P.phases).map(function(k){ return '<option value="' + k + '"' + (a.phase === k ? ' selected' : '') + '>' + P.phases[k].label + '</option>'; }).join('');
-  return '<details class="panel" id="settings"' + (ui.settingsOpen ? ' open' : '') + '><summary>Réglages du compte</summary>' +
-    '<div class="group"><div class="fields">' +
-      field('Nom du compte', 'name', a.name, {text:true, full:true}) +
-      '<div class="field"><label for="f-plan">Type de compte</label><select id="f-plan" data-f="plan">' + planOpts + '</select></div>' +
-      '<div class="field"><label for="f-phase">Phase</label><select id="f-phase" data-f="phase">' + phaseOpts + '</select></div>' +
-    '</div><p class="note">Changer le type ou la phase recharge les règles et remet le solde au départ.</p></div>' +
-    '<div class="group"><h3>Mon objectif</h3><div class="fields">' +
-      '<div class="field full"><label for="f-goalMode">Ce que je vise</label><select id="f-goalMode" data-f="goalMode">' +
-        '<option value="validate"' + (!isMonthly(a) ? ' selected' : '') + '>Valider le compte (objectif de la firm)</option>' +
-        '<option value="monthly"' + (isMonthly(a) ? ' selected' : '') + '>Un objectif par mois</option></select></div>' +
-      field('Objectif par mois ($)', 'monthlyGoal', a.monthlyGoal, {cls:'g-monthly'}) +
-      field('Jours de trading par mois', 'tradingDays', a.tradingDays, {cls:'g-monthly'}) +
-      field('TP visés par jour', 'tpPerDay', a.tpPerDay, {cls:'g-monthly', hint:'1 = un TP puis stop'}) +
-      field('RR du TP', 'rr', a.rr, {hint:'1,5 = TP à 1,5R'}) +
-    '</div></div>' +
+  return '<details class="panel" id="settings"' + (ui.settingsOpen ? ' open' : '') + '><summary>Réglages avancés</summary>' +
+    '<p class="note">Tout est déjà rempli par l’assistant. Ne touche à ces chiffres que si ton compte a des règles différentes.</p>' +
+    '<div class="group"><div class="fields">' + field('Nom du compte', 'name', a.name, {text:true, full:true}) + '</div></div>' +
     '<div class="group"><h3>Règles de la firm</h3><div class="fields">' +
       field('Taille du compte ($)', 'size', a.size) +
-      field(isEval(a) ? 'Objectif de profit ($)' : 'Objectif (prochain retrait, $)', 'target', a.target) +
-      field('Drawdown max ($)', 'dd', a.dd) +
-      field('Limite journalière ($)', 'dll', a.dll, {hint:'0 = aucune'}) +
-      field('Consistance (%)', 'consistency', a.consistency, {hint:'0 = aucune'}) +
-      field('Jours de trading min', 'minDays', a.minDays) +
-      field('Contrats max firm (minis)', 'firmMax', a.firmMax, {hint: phaseOf(a).scaling ? 'les paliers s’appliquent en plus' : ''}) +
+      field(isEval(a) ? 'Objectif pour valider ($)' : 'Objectif de retrait ($)', 'target', a.target) +
+      field('Perte max du compte, drawdown ($)', 'dd', a.dd) +
+      field('Perte max par jour ($)', 'dll', a.dll, {hint:'0 = aucune'}) +
+      field('Règle de consistance (%)', 'consistency', a.consistency, {hint:'0 = aucune'}) +
+      field('Jours de trading minimum', 'minDays', a.minDays) +
+      field('Contrats max de la firm (minis)', 'firmMax', a.firmMax, {hint: phaseOf(a).scaling ? 'les paliers s’appliquent en plus' : ''}) +
       field('Micros par mini', 'microRatio', a.microRatio) +
     '</div>' +
-    '<label class="check"><input type="checkbox" data-f="metalsBlocked"' + (a.metalsBlocked ? ' checked' : '') + '> Métaux interdits sur ce compte</label>' +
-    '<label class="check"><input type="checkbox" data-f="autoTrail"' + (a.autoTrail ? ' checked' : '') + '> Drawdown EOD : monter le seuil automatiquement chaque nouveau jour</label></div>' +
-    '<div class="group g-validate"><h3>Calcul du R</h3><div class="fields">' +
+    '<label class="check"><input type="checkbox" data-f="metalsBlocked"' + (a.metalsBlocked ? ' checked' : '') + '> Or et métaux interdits sur ce compte</label>' +
+    '<label class="check"><input type="checkbox" data-f="autoTrail"' + (a.autoTrail ? ' checked' : '') + '> Monter le seuil de liquidation automatiquement chaque nouveau jour (drawdown EOD)</label></div>' +
+    '<div class="group"><h3>Calcul du risque par trade</h3><div class="fields">' +
       '<div class="field full"><label for="f-method">Méthode</label><select id="f-method" data-f="method">' +
+        '<option value="plan"' + (a.method === 'plan' ? ' selected' : '') + '>Automatique, selon mon objectif (conseillé)</option>' +
         '<option value="target"' + (a.method === 'target' ? ' selected' : '') + '>Objectif ÷ nombre de R</option>' +
-        '<option value="dd"' + (a.method === 'dd' ? ' selected' : '') + '>Drawdown ÷ nombre de SL</option>' +
+        '<option value="dd"' + (a.method === 'dd' ? ' selected' : '') + '>Drawdown ÷ nombre de stops</option>' +
         '<option value="fixed"' + (a.method === 'fixed' ? ' selected' : '') + '>Montant fixe</option></select></div>' +
       field('Nombre de R pour valider', 'nR', a.nR, {cls:'m-target'}) +
-      field('Nombre de SL pour cramer', 'nSL', a.nSL, {cls:'m-dd'}) +
-      field('1R en $', 'fixedR', a.fixedR, {cls:'m-fixed'}) +
+      field('Nombre de stops pour perdre le compte', 'nSL', a.nSL, {cls:'m-dd'}) +
+      field('Risque par trade ($)', 'fixedR', a.fixedR, {cls:'m-fixed'}) +
     '</div></div>' +
-    '<div class="group"><h3>Mes règles</h3><div class="fields">' +
-      field('Contrats max perso (minis)', 'persoCap', a.persoCap, {hint:'micros = × micros par mini'}) +
+    '<div class="group"><h3>Mes règles perso</h3><div class="fields">' +
+      field('Contrats max (minis)', 'persoCap', a.persoCap, {hint:'micros = × micros par mini'}) +
       field('Trades max par jour', 'maxTrades', a.maxTrades) +
-      field('SL max par jour', 'maxSLDay', a.maxSLDay) +
-      field('Jours visés pour valider', 'daysGoal', a.daysGoal) +
+      field('Pertes max par jour', 'maxSLDay', a.maxSLDay) +
+      field('TP = combien de fois le risque', 'rr', a.rr, {hint:'1,5 = tu gagnes 1,5 fois ce que tu risques'}) +
     '</div></div>' +
     '<div class="group"><h3>Transférer mes comptes (téléphone ↔ ordinateur)</h3>' +
       '<p class="note">Sur l’appareil de départ : Copier. Sur l’autre : colle le code puis Importer.</p>' +
@@ -969,70 +1090,239 @@ function settingsHTML(a){
       '<button class="btn danger" data-act="delete">' + (ui.confirmDelete ? 'Confirmer la suppression' : 'Supprimer ce compte') + '</button>' +
     '</div></div></details>';
 }
-
+function accountTabHTML(a, c){
+  return '<section class="panel"><h2>Où j’en suis</h2><div class="fields">' +
+      field('Solde actuel ($)', 'balance', round2(a.balance)) +
+      field('Seuil de liquidation ($)', 'threshold', round2(a.threshold), {hint:'celui affiché par la firm'}) +
+    '</div><div id="o-progress" class="col">' + progressOutHTML(a, c) + '</div></section>' +
+    '<section class="panel"><h2>Si je prends des pertes</h2><div id="o-scen" class="col">' + scenHTML(a, c) + '</div></section>' +
+    (isEval(a) ? '<section class="panel validate-panel"><h2>Compte validé ?</h2><p class="note">Quand la firm t’a validé ce compte, appuie ici : il passe en mode financé avec ses nouvelles règles.</p><button class="btn validate" data-act="validate-open">J’ai validé ce compte</button></section>' : '') +
+    settingsHTML(a) +
+    '<p class="foot">Règles vérifiées le ' + VERIFIED + '. Elles changent souvent : confirme-les sur ton dashboard. Données enregistrées sur cet appareil.</p>';
+}
 function toggleMethod(a){
   ['target','dd','fixed'].forEach(function(m){
     app.querySelectorAll('.m-' + m).forEach(function(el){ el.classList.toggle('hide', a.method !== m); });
   });
-  app.querySelectorAll('.g-monthly').forEach(function(el){ el.classList.toggle('hide', !isMonthly(a)); });
-  app.querySelectorAll('.g-validate').forEach(function(el){ el.classList.toggle('hide', isMonthly(a)); });
 }
 
-function addHTML(){
-  return '<section class="panel"><h2>Ajouter un compte</h2><div class="presets">' +
-    PLAN_ORDER.map(function(k){
-      const P = PLANS[k], e = P.phases.eval;
-      return '<button class="btn" data-act="create" data-k="' + k + '">' + esc(P.name) + '<small>' + (k === 'custom' ? 'Règles à saisir' : 'Objectif ' + money(e.target) + ' · DD ' + money(e.dd)) + '</small></button>';
-    }).join('') + '</div><div class="btn-row"><button class="btn ghost" data-act="cancel-add">Annuler</button></div></section>';
+/* ----- Assistant ----- */
+const FIRMS = [
+  {k:'apex', label:'Apex', sub:'Apex Trader Funding', plans:['apex50']},
+  {k:'lucid', label:'Lucid', sub:'Lucid Trading', plans:['lucid50pro','lucid50flex']},
+  {k:'tradeify', label:'Tradeify', sub:'Tradeify', plans:['tradeify100select','tradeify100growth']},
+  {k:'other', label:'Une autre firm', sub:'je saisis les règles moi-même', plans:['custom']}
+];
+function firmOfPlan(pk){ const f = FIRMS.find(function(x){ return x.plans.indexOf(pk) >= 0; }); return f ? f.k : 'other'; }
+function wizOpen(mode){
+  const a = cur();
+  const d = mode === 'new'
+    ? {firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', useMicro:false, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
+    : {firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays, und:a.und, useMicro:a.useMicro, persoCap:a.persoCap, maxTrades:a.maxTrades, rr:a.rr, custom:{size:a.size, target:a.target, dd:a.dd, dll:a.dll}};
+  ui.wiz = {mode:mode, step: mode === 'goal' ? 'goal' : 'firm', d:d};
+  closeModal();
+  render({enter:true});
+  window.scrollTo(0, 0);
 }
+function wizSteps(){
+  if(ui.wiz.mode === 'goal') return ['goal','perso'];
+  const s = ['firm','plan','phase','goal','market','perso'];
+  if(ui.wiz.d.plan === 'custom') s.splice(2, 0, 'custom');
+  return s;
+}
+function draftAccount(d){
+  const a = {plan:d.plan || 'apex50', phase:d.phase || 'eval'};
+  applyPhase(a);
+  Object.keys(PERSO).forEach(function(k){ a[k] = PERSO[k]; });
+  if(a.plan === 'custom'){ a.size = d.custom.size; a.target = d.custom.target; a.dd = d.custom.dd; a.dll = d.custom.dll; }
+  a.goalMode = a.phase === 'eval' ? 'validate' : 'monthly';
+  a.daysGoal = d.daysGoal; a.monthlyGoal = d.monthlyGoal; a.tradingDays = d.tradingDays;
+  a.maxTrades = d.maxTrades; a.rr = d.rr; a.persoCap = d.persoCap; a.method = 'plan';
+  return a;
+}
+function chips(act, values, current, fmt){
+  return '<div class="chips">' + values.map(function(v){
+    return '<button class="chipbtn" data-act="' + act + '" data-k="' + v + '" aria-pressed="' + (String(v) === String(current)) + '">' + (fmt ? fmt(v) : v) + '</button>';
+  }).join('') + '</div>';
+}
+function stepper(label, key, val, min, max, step){
+  return '<div class="stepper-row"><span>' + label + '</span><div class="stepper"><button data-act="wz-inc" data-f="' + key + '" data-d="' + (-step) + '" aria-label="Moins"' + (val <= min ? ' disabled' : '') + '>−</button>' +
+    '<span class="n">' + num(val, 2) + '</span><button data-act="wz-inc" data-f="' + key + '" data-d="' + step + '" aria-label="Plus"' + (val >= max ? ' disabled' : '') + '>+</button></div></div>';
+}
+function wizPreviewHTML(d){
+  const a = draftAccount(d), p = planFor(a), V = VERDICT[p.verdict] || VERDICT.ok;
+  let h = '<div class="preview ' + V[1] + '"><span class="badge">' + V[0] + '</span><p>' + money(p.D) + ' par jour = <b>' + pl(p.k,'TP','TP') + ' par jour</b>, avec ' + money(p.R) + ' de risque par trade.</p>';
+  if(p.raised) h += '<p class="note">Cette firm impose au moins ' + pl(p.minDays,'jour','jours') + '.</p>';
+  if(a.goalMode === 'validate' && p.verdict !== 'ok' && p.sugOk) h += '<p class="note">Réaliste dès ' + pl(p.sugOk.days,'jour','jours') + ' (' + pl(p.sugOk.k,'TP','TP') + ' par jour).</p>';
+  if(p.ddWarn) h += '<p class="note">C’est ' + num(a.monthlyGoal / a.dd, 1) + ' fois ton drawdown. Plus sûr : ' + money(p.safeMonth) + ' par mois.</p>';
+  return h + '</div>';
+}
+function wizardHTML(){
+  const w = ui.wiz, d = w.d, steps = wizSteps(), i = Math.max(0, steps.indexOf(w.step));
+  let q = '', body = '', canNext = true;
+  const P = d.plan ? PLANS[d.plan] : null;
+  switch(w.step){
+    case 'firm':
+      q = 'Chez quelle prop firm as-tu ton compte ?';
+      body = '<div class="choice">' + FIRMS.map(function(f){
+        return '<button class="btn" data-act="wz-firm" data-k="' + f.k + '" aria-pressed="' + (d.firm === f.k) + '">' + f.label + '<small>' + f.sub + '</small></button>';
+      }).join('') + '</div>';
+      canNext = !!d.firm; break;
+    case 'plan': {
+      const f = FIRMS.find(function(x){ return x.k === d.firm; }) || FIRMS[3];
+      q = 'Quel compte as-tu pris ?';
+      body = '<div class="choice">' + f.plans.map(function(pk){
+        const e = PLANS[pk].phases.eval;
+        return '<button class="btn" data-act="wz-plan" data-k="' + pk + '" aria-pressed="' + (d.plan === pk) + '">' + esc(PLANS[pk].name) +
+          '<small>' + (pk === 'custom' ? 'tu rentres les règles à l’étape suivante' : 'objectif ' + money(e.target) + ' · perte max ' + money(e.dd) + (e.dll ? ' · ' + money(e.dll) + ' par jour' : '')) + '</small></button>';
+      }).join('') + '</div>';
+      canNext = !!d.plan; break;
+    }
+    case 'custom':
+      q = 'Les règles de ton compte';
+      body = '<div class="fields">' +
+        '<div class="field"><label for="w-size">Taille ($)</label><input id="w-size" data-w="size" type="number" inputmode="decimal" value="' + d.custom.size + '"></div>' +
+        '<div class="field"><label for="w-target">Objectif pour valider ($)</label><input id="w-target" data-w="target" type="number" inputmode="decimal" value="' + d.custom.target + '"></div>' +
+        '<div class="field"><label for="w-dd">Perte max du compte ($)</label><input id="w-dd" data-w="dd" type="number" inputmode="decimal" value="' + d.custom.dd + '"></div>' +
+        '<div class="field"><label for="w-dll">Perte max par jour ($)</label><input id="w-dll" data-w="dll" type="number" inputmode="decimal" value="' + d.custom.dll + '"><span class="hint">0 = aucune</span></div></div>';
+      break;
+    case 'phase': {
+      q = 'Où en es-tu avec ce compte ?';
+      const keys = Object.keys(P.phases);
+      body = '<div class="choice">' + keys.map(function(k){
+        const ph = P.phases[k];
+        const label = k === 'eval' ? 'Je dois le valider' : 'Il est déjà validé' + (keys.length > 2 ? ' · ' + ph.label.replace('Financé ', '') : '');
+        const sub = k === 'eval' ? 'évaluation : objectif de ' + money(ph.target) + ' à atteindre' : 'compte financé : tu vises un gain par mois';
+        return '<button class="btn" data-act="wz-phase" data-k="' + k + '" aria-pressed="' + (d.phase === k) + '">' + label + '<small>' + sub + '</small></button>';
+      }).join('') + '</div>';
+      break;
+    }
+    case 'goal':
+      if(d.phase === 'eval'){
+        q = 'En combien de jours veux-tu le valider ?';
+        body = chips('wz-days', [1,2,3,4,5,6,8,10], d.daysGoal, function(v){ return v + ' j'; }) + wizPreviewHTML(d);
+      } else {
+        q = 'Combien veux-tu gagner par mois ?';
+        body = chips('wz-month', [1000,1500,2000,3000,5000], d.monthlyGoal, function(v){ return money(v); }) +
+          '<p class="note">Jours de trading par mois</p>' + chips('wz-tdays', [12,16,20], d.tradingDays) + wizPreviewHTML(d);
+      }
+      break;
+    case 'market': {
+      q = 'Sur quel marché tu trades ?';
+      const metals = P && P.metalsBlocked;
+      body = '<div class="choice">' + UND_ORDER.map(function(k){
+        const U = UND[k], blocked = metals && U.metal;
+        return '<button class="btn' + (blocked ? ' blocked' : '') + '" data-act="wz-und" data-k="' + k + '" aria-pressed="' + (d.und === k) + '"' + (blocked ? ' disabled' : '') + '>' + U.label +
+          '<small>' + (blocked ? 'interdit chez Apex depuis mars 2026' : 'contrats ' + U.mini + ' (mini) ou ' + U.micro + ' (micro)') + '</small></button>';
+      }).join('') + '</div>' +
+        '<p class="note">Taille de contrat</p><div class="chips">' +
+        '<button class="chipbtn" data-act="wz-size" data-k="mini" aria-pressed="' + !d.useMicro + '">Mini · ' + UND[d.und].mini + '</button>' +
+        '<button class="chipbtn" data-act="wz-size" data-k="micro" aria-pressed="' + !!d.useMicro + '">Micro · ' + UND[d.und].micro + '</button></div>';
+      canNext = !(metals && UND[d.und].metal);
+      break;
+    }
+    case 'perso': {
+      q = 'Tes règles perso';
+      const fm = P ? (P.phases[d.phase] || P.phases.eval).firmMax : 10;
+      body = '<p class="note">Les valeurs conseillées sont déjà remplies. Change-les seulement si tu veux.</p>' +
+        stepper('Contrats max (en mini)', 'persoCap', d.persoCap, 1, fm, 1) +
+        stepper('Trades max par jour', 'maxTrades', d.maxTrades, 1, 10, 1) +
+        '<div class="stepper-row"><span>Ton TP = combien de fois ton risque ?</span></div>' + chips('wz-rr', [1, 1.5, 2, 3], d.rr, function(v){ return num(v, 1) + 'R'; });
+      break;
+    }
+  }
+  const last = i === steps.length - 1;
+  let dots = '';
+  for(let k = 0; k < steps.length; k++) dots += '<i class="' + (k <= i ? 'on' : '') + '"></i>';
+  return '<section class="panel wiz"><div class="wiz-head"><button class="linkbtn" data-act="wz-back"' + (i === 0 ? ' style="visibility:hidden"' : '') + '>← Retour</button><div class="dots" aria-label="Étape ' + (i + 1) + ' sur ' + steps.length + '">' + dots + '</div><button class="linkbtn" data-act="wz-close">Fermer</button></div>' +
+    '<h2 class="wiz-q">' + q + '</h2>' + body +
+    '<button class="btn primary big" data-act="wz-next"' + (canNext ? '' : ' disabled') + '>' + (last ? 'Calculer mon plan' : 'Continuer') + '</button></section>';
+}
+function applyWizard(){
+  const w = ui.wiz, d = w.d;
+  let a;
+  if(w.mode === 'new'){ a = makeAccount(d.plan); state.accounts.push(a); state.selected = a.id; }
+  else a = cur();
+  const changed = w.mode === 'new' || a.plan !== d.plan || a.phase !== d.phase;
+  if(changed){ a.plan = d.plan; a.phase = d.phase; resetForPhase(a); a.name = PLANS[d.plan].short; }
+  if(d.plan === 'custom'){
+    a.size = d.custom.size; a.target = d.custom.target; a.dd = d.custom.dd; a.dll = d.custom.dll;
+    if(changed){ a.balance = a.size; a.threshold = a.size - a.dd; }
+  }
+  a.goalMode = a.phase === 'eval' ? 'validate' : 'monthly';
+  a.daysGoal = d.daysGoal; a.monthlyGoal = d.monthlyGoal; a.tradingDays = d.tradingDays;
+  a.und = d.und; a.useMicro = d.useMicro; a.persoCap = d.persoCap; a.maxTrades = d.maxTrades; a.rr = d.rr;
+  a.method = 'plan'; a.configured = true;
+  ui.wiz = null; ui.tab = 'plan'; prevSlots = null;
+  render({enter:true}); touch();
+  window.scrollTo(0, 0);
+  toast('Ton plan est prêt'); confetti(60);
+}
+function wizAct(act, btn){
+  const w = ui.wiz;
+  if(!w) return false;
+  const d = w.d, steps = wizSteps(), i = steps.indexOf(w.step);
+  const go = function(delta){ const n = steps[i + delta]; if(n){ w.step = n; render({enter:true}); window.scrollTo(0, 0); } };
+  switch(act){
+    case 'wz-close': ui.wiz = null; render({enter:true}); return true;
+    case 'wz-back': go(-1); return true;
+    case 'wz-next':
+      if(i === steps.length - 1) applyWizard(); else go(1);
+      return true;
+    case 'wz-firm': {
+      d.firm = btn.dataset.k;
+      const f = FIRMS.find(function(x){ return x.k === d.firm; });
+      if(f.plans.indexOf(d.plan) < 0) d.plan = f.plans.length === 1 ? f.plans[0] : null;
+      render(); setTimeout(function(){ go(1); }, 160); return true;
+    }
+    case 'wz-plan':
+      d.plan = btn.dataset.k;
+      if(!PLANS[d.plan].phases[d.phase]) d.phase = 'eval';
+      if(PLANS[d.plan].metalsBlocked && UND[d.und].metal) d.und = 'DOW';
+      render(); setTimeout(function(){ go(1); }, 160); return true;
+    case 'wz-phase': d.phase = btn.dataset.k; render(); setTimeout(function(){ go(1); }, 160); return true;
+    case 'wz-days': d.daysGoal = +btn.dataset.k; render(); return true;
+    case 'wz-month': d.monthlyGoal = +btn.dataset.k; render(); return true;
+    case 'wz-tdays': d.tradingDays = +btn.dataset.k; render(); return true;
+    case 'wz-und': d.und = btn.dataset.k; render(); return true;
+    case 'wz-size': d.useMicro = btn.dataset.k === 'micro'; render(); return true;
+    case 'wz-rr': d.rr = +btn.dataset.k; render(); return true;
+    case 'wz-inc': { const k = btn.dataset.f; d[k] = Math.max(1, Math.round((d[k] + (+btn.dataset.d)) * 100) / 100); render(); return true; }
+  }
+  return false;
+}
+app.addEventListener('input', function(e){
+  const t = e.target;
+  if(t.dataset && t.dataset.w && ui.wiz){ const v = parseNum(t.value); if(isFinite(v) && v >= 0) ui.wiz.d.custom[t.dataset.w] = v; }
+});
 
+/* ----- Rendu général ----- */
 function render(opts){
   renderTabs();
-  if(ui.adding){ app.innerHTML = addHTML(); playEnter(); return; }
-  const a = cur();
-  const c = compute(a);
-  app.innerHTML =
-    '<section class="status ' + c.status.cls + '" id="o-status" aria-live="polite">' + statusHTML(a, c) + '</section>' +
-    '<section class="panel"><h2>' + (c.monthly ? 'Mon plan du mois' : 'Mon plan pour valider') + '</h2><div id="o-plan" style="display:flex;flex-direction:column;gap:10px">' + planHTML(a, c) + '</div></section>' +
-    '<section class="panel hero"><h2>Combien de contrats ?</h2>' + heroSegHTML(a) +
-      slControlHTML(a) +
-      '<div id="o-hero" style="display:flex;flex-direction:column;gap:10px">' + heroOutHTML(a, c) + '</div></section>' +
-    '<section class="panel"><h2>Aujourd’hui</h2><div id="o-today" style="display:flex;flex-direction:column;gap:12px">' + todayOutHTML(a, c) + '</div>' +
-      '<div class="inline">' + field('Autre résultat ($) : partiel, TP1 + BE…', 'customPnl', '') + '<button class="btn primary" data-act="log-custom">Ajouter</button></div>' +
-      '<div id="o-log">' + logHTML(a) + '</div>' +
-      '<div class="fields">' + field('P&L du jour ($)', 'pnlToday', round2(a.pnlToday)) + field('Trades faits aujourd’hui', 'tradesToday', a.tradesToday) + '</div>' +
-      '<div id="o-alerts" style="display:flex;flex-direction:column;gap:8px">' + todayAlertsHTML(a, c) + '</div>' +
-      '<div id="o-pace" style="display:flex;flex-direction:column;gap:8px">' + paceHTML(a, c) + '</div></section>' +
-    '<section class="panel"><h2>Règles du compte</h2><div id="o-rules" style="display:flex;flex-direction:column;gap:10px">' + rulesHTML(a, c) + '</div></section>' +
-    '<section class="panel"><h2>Où j’en suis</h2><div class="fields">' +
-      field('Solde actuel ($)', 'balance', round2(a.balance)) +
-      field('Seuil de liquidation ($)', 'threshold', round2(a.threshold), {hint:'celui affiché par la firm'}) +
-      '</div><div id="o-progress" style="display:flex;flex-direction:column;gap:8px">' + progressOutHTML(a, c) + '</div></section>' +
-    '<section class="panel"><h2>Scénarios pour ' + (c.monthly ? 'finir le mois' : 'valider') + '</h2><div id="o-scen" style="display:flex;flex-direction:column;gap:10px">' + scenHTML(a, c) + '</div></section>' +
-    settingsHTML(a) +
-    (isEval(a) ? '<section class="panel validate-panel"><h2>Compte validé ?</h2><p class="note">Quand la firm t’a validé ce compte, appuie ici : il passe en mode financé avec ses nouvelles règles.</p><button class="btn validate" data-act="validate-open">J’ai validé ce compte</button></section>' : '') +
-    '<p class="foot">Règles vérifiées le ' + VERIFIED + '. Elles changent souvent : confirme-les sur ton dashboard. Données enregistrées sur cet appareil.</p>';
+  renderNav();
+  if(ui.wiz){ app.innerHTML = wizardHTML(); if(opts && opts.enter) playEnter(); return; }
+  const a = cur(), c = compute(a), p = planFor(a);
+  app.innerHTML = ui.tab === 'plan' ? planTabHTML(a, c, p) : ui.tab === 'account' ? accountTabHTML(a, c) : todayTabHTML(a, c);
   toggleMethod(a);
   const det = document.getElementById('settings');
-  det.addEventListener('toggle', function(){ ui.settingsOpen = det.open; });
+  if(det) det.addEventListener('toggle', function(){ ui.settingsOpen = det.open; });
   if(opts && opts.enter) playEnter();
   postRender();
 }
-
+function setHTML(id, html){ const el = document.getElementById(id); if(el) el.innerHTML = html; }
 function renderOutputs(){
-  const a = cur();
-  const c = compute(a);
+  if(ui.wiz) return;
+  const a = cur(), c = compute(a), p = planFor(a);
   const st = document.getElementById('o-status');
-  st.className = 'status ' + c.status.cls;
-  st.innerHTML = statusHTML(a, c);
-  document.getElementById('o-plan').innerHTML = planHTML(a, c);
-  document.getElementById('o-hero').innerHTML = heroOutHTML(a, c);
-  document.getElementById('o-today').innerHTML = todayOutHTML(a, c);
-  document.getElementById('o-alerts').innerHTML = todayAlertsHTML(a, c);
-  document.getElementById('o-pace').innerHTML = paceHTML(a, c);
-  document.getElementById('o-rules').innerHTML = rulesHTML(a, c);
-  document.getElementById('o-progress').innerHTML = progressOutHTML(a, c);
-  document.getElementById('o-scen').innerHTML = scenHTML(a, c);
+  if(st){ st.className = 'status ' + c.status.cls; st.innerHTML = statusHTML(a, c); }
+  setHTML('o-trade', tradeOutHTML(a, c));
+  setHTML('o-day', dayOutHTML(a, c));
+  setHTML('o-progress', progressOutHTML(a, c));
+  setHTML('o-scen', scenHTML(a, c));
+  setHTML('o-steps', planStepsHTML(a, c, p));
+  setHTML('o-rules', rulesHTML(a, c));
+  const vd = document.getElementById('o-verdict');
+  if(vd){ vd.className = 'panel verdict ' + (VERDICT[p.verdict] || VERDICT.ok)[1]; vd.innerHTML = '<h2>Est-ce réaliste ?</h2>' + verdictHTML(a, p); }
   toggleMethod(a);
   postRender();
 }
@@ -1189,8 +1479,7 @@ function successHTML(a){
     '<h2 id="modal-title">Félicitations, compte validé !</h2>' +
     '<p><b>' + esc(a.name) + '</b> passe en <b>' + ph.label + '</b>. Nouvelle étape : régularité et discipline, pour aller chercher les retraits.</p>' +
     '<ul class="rules">' + ph.rules.slice(0, 3).map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
-    '<p class="note">Objectif du mois réglé à ' + money(a.monthlyGoal) + ' : change-le dans les réglages du compte.</p>' +
-    '<div class="btn-col"><button class="btn validate" data-act="modal-close">C’est parti</button></div>';
+    '<div class="btn-col"><button class="btn validate" data-act="wiz-goal">Régler mon objectif du mois</button><button class="btn ghost" data-act="modal-close">Plus tard</button></div>';
 }
 function celebrateValidation(){
   buzz([40, 60, 40, 60, 120]);
@@ -1243,9 +1532,13 @@ function addTrade(a, label, v){
 function handleAct(btn){
   const act = btn.dataset.act;
   if(act !== 'delete') ui.confirmDelete = false;
+  if(wizAct(act, btn)) return;
   switch(act){
-    case 'select': state.selected = btn.dataset.id; ui.adding = false; ui.settingsOpen = false; prevSlots = null; render({enter:true}); touch(); return;
-    case 'add': ui.adding = true; render(); return;
+    case 'tab': ui.tab = btn.dataset.k; render({enter:true}); window.scrollTo(0, 0); return;
+    case 'wiz-open': wizOpen('edit'); return;
+    case 'wiz-goal': wizOpen('goal'); return;
+    case 'select': state.selected = btn.dataset.id; ui.wiz = null; ui.adding = false; ui.settingsOpen = false; prevSlots = null; render({enter:true}); touch(); return;
+    case 'add': wizOpen('new'); return;
     case 'cancel-add': ui.adding = false; render(); return;
     case 'create': { const n = makeAccount(btn.dataset.k); state.accounts.push(n); state.selected = n.id; ui.adding = false; prevSlots = null; render({enter:true}); touch(); toast('Compte ajouté'); return; }
   }
@@ -1258,6 +1551,8 @@ function handleAct(btn){
       const nv = Math.round(((a.sl[a.und] || U.defSL) + (act === 'sl-inc' ? U.bstep : -U.bstep)) * 100) / 100;
       a.sl[a.und] = Math.max(U.rstep, nv); syncSL(''); renderOutputs(); touch(); buzz(5); return;
     }
+    case 'set-days': a.daysGoal = +btn.dataset.k; toast('Plan recalculé sur ' + pl(a.daysGoal,'jour','jours')); break;
+    case 'set-month': a.monthlyGoal = +btn.dataset.k; toast('Objectif du mois : ' + money(a.monthlyGoal)); break;
     case 'und': a.und = btn.dataset.k; break;
     case 'size': a.useMicro = btn.dataset.k === 'micro'; break;
     case 'log-tp': if(c.TP > 0){ addTrade(a, 'TP', c.TP); effect = 'tp'; } break;
@@ -1337,7 +1632,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '6';
+const APP_VERSION = '7';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
