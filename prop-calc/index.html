@@ -337,6 +337,11 @@ details.more[open]>summary{margin-bottom:8px}
 .wiz .linkbtn{align-self:flex-start}
 .pc-risk{color:var(--muted);font-size:13px}
 .pc-risk.bad{color:var(--bad);font-weight:600}
+.sl-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.unit-seg{width:auto;min-width:150px;padding:3px}
+.unit-seg button{padding:6px 12px;font-size:13px}
+.wiz .unit-seg{align-self:flex-start}
+.leg .v small,.pc-main small{font:500 12px var(--font-num);color:var(--muted)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -961,14 +966,32 @@ function heroSegHTML(a){
     '<button role="radio" data-act="size" data-k="micro" aria-checked="' + !!a.useMicro + '">Micro · ' + U.micro + '</button></div>';
   return h;
 }
+function unitMode(){ return state.unitMode === 'points' ? 'points' : 'ticks'; }
+function tickOf(und){ return INSTR[(UND[und] || UND.DOW).mini].tick; }
+function toUnit(und, pts){ return unitMode() === 'ticks' ? Math.round(pts / tickOf(und) * 100) / 100 : pts; }
+function fromUnit(und, v){ return unitMode() === 'ticks' ? v * tickOf(und) : v; }
+// Affiche une distance dans l'unité choisie ; l'autre unité en petit quand elles diffèrent.
+function fmtDist(und, pts, other){
+  const t = tickOf(und), dec = INSTR[(UND[und] || UND.DOW).mini].dec;
+  const ticks = Math.round(pts / t);
+  const P = num(Math.round(pts / t) * t, dec) + ' pts', T = nf(0).format(ticks) + ' ticks';
+  const extra = other && Math.abs(t - 1) > 1e-9;
+  return unitMode() === 'ticks' ? T + (extra ? ' <small>(' + P + ')</small>' : '') : P + (extra ? ' <small>(' + T + ')</small>' : '');
+}
+function unitSegHTML(){
+  return '<div class="seg c2 unit-seg" role="radiogroup" aria-label="Unité du stop">' +
+    '<button role="radio" data-act="unit" data-k="ticks" aria-checked="' + (unitMode() === 'ticks') + '">Ticks</button>' +
+    '<button role="radio" data-act="unit" data-k="points" aria-checked="' + (unitMode() === 'points') + '">Points</button></div>';
+}
 function slControlHTML(a){
   const U = UND[a.und], v = a.sl[a.und];
-  return '<div class="field big full"><label for="f-sl">La taille de ton stop, en points</label>' +
+  const ticks = unitMode() === 'ticks', lo = toUnit(a.und, U.min), hi = toUnit(a.und, U.max), u = ticks ? 'ticks' : 'pts';
+  return '<div class="field big full"><div class="sl-head"><label for="f-sl">La taille de ton stop, en ' + (ticks ? 'ticks' : 'points') + '</label>' + unitSegHTML() + '</div>' +
     '<div class="sl-row"><button type="button" data-act="sl-dec" aria-label="Réduire le stop">−</button>' +
-    '<input id="f-sl" data-f="sl" type="number" inputmode="decimal" step="any" value="' + esc(v) + '">' +
+    '<input id="f-sl" data-f="sl" type="number" inputmode="decimal" step="any" value="' + esc(toUnit(a.und, v)) + '">' +
     '<button type="button" data-act="sl-inc" aria-label="Agrandir le stop">+</button></div>' +
-    '<input id="f-slr" data-f="sl" type="range" min="' + U.min + '" max="' + U.max + '" step="' + U.rstep + '" value="' + Math.min(U.max, Math.max(U.min, v)) + '" aria-label="Glisse pour régler ton stop">' +
-    '<div class="range-scale"><span>' + U.min + ' pts</span><span>glisse pour régler</span><span>' + U.max + ' pts</span></div></div>';
+    '<input id="f-slr" data-f="sl" type="range" min="' + lo + '" max="' + hi + '" step="' + (ticks ? 1 : U.rstep) + '" value="' + Math.min(hi, Math.max(lo, toUnit(a.und, v))) + '" aria-label="Glisse pour régler ton stop">' +
+    '<div class="range-scale"><span>' + nf(2).format(lo) + ' ' + u + '</span><span>' + (Math.abs(tickOf(a.und) - 1) > 1e-9 ? '1 point = ' + Math.round(1 / tickOf(a.und)) + ' ticks' : '1 point = 1 tick') + '</span><span>' + nf(2).format(hi) + ' ' + u + '</span></div></div>';
 }
 function vizHTML(a, c){
   const total = c.capMainNow;
@@ -999,8 +1022,8 @@ function tradeOutHTML(a, c){
   let h = '<div class="answer"><span class="bignum' + (c.main.used === 0 ? ' zero' : '') + '">' + c.main.used + '</span><span class="unit">' + I.label + '</span><span class="answer-cap">' + (c.main.used > 1 ? 'contrats à prendre' : 'contrat à prendre') + '</span></div>';
   if(c.main.used > 0){
     h += '<div class="trade-legs">' +
-      '<div class="leg sl"><span class="k">Ton stop</span><span class="v">' + num(c.sl, I.dec) + ' pts</span><span class="s">si touché : −' + money(c.main.risk) + '</span></div>' +
-      '<div class="leg tp"><span class="k">Ton objectif (TP)</span><span class="v">' + num(c.tpPts, 2) + ' pts</span><span class="s">si touché : +' + money(c.tpGain) + '</span></div></div>';
+      '<div class="leg sl"><span class="k">Ton stop</span><span class="v">' + fmtDist(a.und, c.sl, true) + '</span><span class="s">si touché : −' + money(c.main.risk) + '</span></div>' +
+      '<div class="leg tp"><span class="k">Ton objectif (TP)</span><span class="v">' + fmtDist(a.und, c.tpPts, true) + '</span><span class="s">si touché : +' + money(c.tpGain) + '</span></div></div>';
   } else {
     h += '<p class="alert bad">Stop trop grand : même 1 ' + I.label + ' te ferait perdre ' + money(c.sl * I.pv) + ', plus que les ' + money(c.riskNext) + ' autorisés.' +
       (c.alt.used > 0 ? ' Prends plutôt <b>' + c.alt.used + ' ' + J.label + '</b>.' : ' Réduis ton stop.') + '</p>';
@@ -1018,8 +1041,8 @@ function tradeOutHTML(a, c){
   if(c.rows.length){
     h += '<details class="more"><summary>Voir le tableau stop / contrats</summary><div class="tablewrap"><table><thead><tr><th>' + I.label + '</th><th>Stop max</th><th>Objectif</th></tr></thead><tbody>' +
       c.rows.map(function(r){
-        return '<tr' + (r.k === c.main.used ? ' class="cur"' : '') + '><td>' + r.k + '</td><td>' + (r.sl > 0 ? num(r.sl, I.dec) + ' pts' : '—') + '</td><td>' + (r.sl > 0 ? num(r.sl * a.rr, 2) + ' pts' : '—') + '</td></tr>';
-      }).join('') + '</tbody></table></div><p class="note">1 point ' + I.label + ' = ' + num(I.pv, 2) + ' $ par contrat.</p></details>';
+        return '<tr' + (r.k === c.main.used ? ' class="cur"' : '') + '><td>' + r.k + '</td><td>' + (r.sl > 0 ? fmtDist(a.und, r.sl, false) : '—') + '</td><td>' + (r.sl > 0 ? fmtDist(a.und, r.sl * a.rr, false) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div><p class="note">1 tick ' + I.label + ' = ' + num(I.pv * I.tick, 2) + ' $ par contrat · 1 point = ' + num(I.pv, 2) + ' $.</p></details>';
   }
   return h;
 }
@@ -1148,7 +1171,7 @@ function samePlan(x, y){ return Math.abs(x.R - y.R) < 1 && x.rr === y.rr && x.N 
 function planDesc(a, g){
   const U = UND[a.und] || UND.DOW, key = g.unit === 'micro' ? U.micro : U.mini, I = INSTR[key];
   const sl = a.sl && a.sl[a.und] > 0 ? a.sl[a.und] : U.defSL;
-  return '<span class="pc-main">' + (g.n > 0 ? g.n : '—') + ' ' + key + ' · stop ' + num(sl, I.dec) + ' pts · TP ' + num(sl * g.rr, 2) + ' pts</span>' +
+  return '<span class="pc-main">' + (g.n > 0 ? g.n : '—') + ' ' + key + ' · stop ' + fmtDist(a.und, sl, false) + ' · TP ' + fmtDist(a.und, sl * g.rr, false) + '</span>' +
     '<span>Tu risques ' + money(g.R) + ' par trade et tu gagnes ' + money(g.R * g.rr) + ' par TP (' + num(g.rr, 1) + 'R).</span>' +
     '<span>' + pl(g.N, 'trade', 'trades') + ' max par jour, tu arrêtes après ' + pl(g.k, 'TP gagné', 'TP gagnés') + '.</span>' +
     (a.dd > 0 && g.R > 0 ? (function(){ const n = Math.ceil(a.dd / (g.R + (g.cost || 0)) - 1e-9); return '<span class="pc-risk' + (n <= 3 ? ' bad' : '') + '">Compte perdu au bout de ' + n + ' stops d’affilée.</span>'; })() : '');
@@ -1296,6 +1319,7 @@ const FIRMS = [
   {k:'other', label:'Une autre firm', sub:'je saisis les règles moi-même', plans:['custom']}
 ];
 const SL_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[2,3,4,5,6,8,10], NQ:[8,10,15,20,25,30,40]};
+const TICK_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[20,30,40,50,60,80,100], NQ:[30,40,60,80,100,120,160]};
 function firmOfPlan(pk){ const f = FIRMS.find(function(x){ return x.plans.indexOf(pk) >= 0; }); return f ? f.k : 'other'; }
 function wizOpen(mode){
   const a = cur();
@@ -1439,10 +1463,11 @@ function wizardHTML(){
     }
     case 'stop': {
       const U = UND[d.und];
-      q = 'Ton stop fait combien de points, en général ?';
-      body = '<p class="note">Sur le ' + U.label + '. S’il change d’un trade à l’autre, prends ton stop moyen : l’appli recalcule les contrats à chaque trade.</p>' +
-        chips('wz-sl', SL_CHOICES[d.und], d.sl, function(v){ return v + ' pts'; }) +
-        '<button class="linkbtn" data-act="wz-sl" data-k="?">Je ne sais pas, prends ' + U.defSL + ' pts</button>';
+      const tk = unitMode() === 'ticks', u = tk ? ' ticks' : ' pts';
+      q = 'Ton stop fait combien de ' + (tk ? 'ticks' : 'points') + ', en général ?';
+      body = unitSegHTML() + '<p class="note">Sur le ' + U.label + '. S’il change d’un trade à l’autre, prends ton stop moyen : l’appli recalcule les contrats à chaque trade.</p>' +
+        chips('wz-sl', tk ? TICK_CHOICES[d.und] : SL_CHOICES[d.und], toUnit(d.und, d.sl), function(v){ return v + u; }) +
+        '<button class="linkbtn" data-act="wz-sl" data-k="?">Je ne sais pas, prends ' + toUnit(d.und, U.defSL) + u + '</button>';
       break;
     }
     case 'level':
@@ -1531,7 +1556,7 @@ function wizAct(act, btn){
     case 'wz-month': d.monthlyGoal = +btn.dataset.k; render(); return true;
     case 'wz-tdays': d.tradingDays = +btn.dataset.k; render(); return true;
     case 'wz-und': if(d.und !== btn.dataset.k){ d.und = btn.dataset.k; d.sl = UND[d.und].defSL; } render(); return true;
-    case 'wz-sl': d.sl = btn.dataset.k === '?' ? UND[d.und].defSL : +btn.dataset.k; render(); if(btn.dataset.k === '?') setTimeout(function(){ go(1); }, 160); return true;
+    case 'wz-sl': d.sl = btn.dataset.k === '?' ? UND[d.und].defSL : fromUnit(d.und, +btn.dataset.k); render(); if(btn.dataset.k === '?') setTimeout(function(){ go(1); }, 160); return true;
     case 'wz-win': d.winRate = btn.dataset.k === '?' ? null : +btn.dataset.k / 10; render(); return true;
     case 'wz-rr': d.rr = +btn.dataset.k; render(); return true;
     case 'wz-inc': { const k = btn.dataset.f; d[k] = Math.max(1, Math.round((d[k] + (+btn.dataset.d)) * 100) / 100); render(); return true; }
@@ -1638,8 +1663,8 @@ function postRender(){
 function syncSL(fromId){
   const a = cur(), v = a.sl[a.und], U = UND[a.und];
   const num = document.getElementById('f-sl'), rng = document.getElementById('f-slr');
-  if(num && fromId !== 'f-sl') num.value = v;
-  if(rng && fromId !== 'f-slr') rng.value = Math.min(U.max, Math.max(U.min, v));
+  if(num && fromId !== 'f-sl') num.value = toUnit(a.und, v);
+  if(rng && fromId !== 'f-slr') rng.value = Math.min(toUnit(a.und, U.max), Math.max(toUnit(a.und, U.min), toUnit(a.und, v)));
 }
 let toastTimer = null;
 function toast(msg){
@@ -1759,7 +1784,7 @@ function onFieldChange(el){
   if(!isFinite(v)) return;
   if(INT_FIELDS[f]) v = Math.max(0, Math.round(v));
   if((f === 'rr' || f === 'sl') && v <= 0) return;
-  if(f === 'sl'){ a.sl[a.und] = v; syncSL(el.id); } else a[f] = v;
+  if(f === 'sl'){ a.sl[a.und] = Math.round(fromUnit(a.und, v) * 10000) / 10000; syncSL(el.id); } else a[f] = v;
   renderOutputs();
   touch();
 }
@@ -1782,6 +1807,7 @@ function handleAct(btn){
   if(wizAct(act, btn)) return;
   switch(act){
     case 'tab': ui.tab = btn.dataset.k; render({enter:true}); window.scrollTo(0, 0); return;
+    case 'unit': if(state.unitMode !== btn.dataset.k){ state.unitMode = btn.dataset.k; render(); touch(); toast(btn.dataset.k === 'ticks' ? 'Stops affichés en ticks' : 'Stops affichés en points'); } return;
     case 'wiz-open': wizOpen('edit'); return;
     case 'wiz-goal': wizOpen('goal'); return;
     case 'select': state.selected = btn.dataset.id; ui.wiz = null; ui.adding = false; ui.settingsOpen = false; prevSlots = null; render({enter:true}); touch(); return;
@@ -1885,7 +1911,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '9';
+const APP_VERSION = '10';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
