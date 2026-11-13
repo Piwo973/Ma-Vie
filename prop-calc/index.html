@@ -342,10 +342,36 @@ details.more[open]>summary{margin-bottom:8px}
 .unit-seg button{padding:6px 12px;font-size:13px}
 .wiz .unit-seg{align-self:flex-start}
 .leg .v small,.pc-main small{font:500 12px var(--font-num);color:var(--muted)}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(circle at 50% 42%,rgba(34,230,255,.16),transparent 42%),radial-gradient(circle at 25% 75%,rgba(139,92,255,.12),transparent 50%),radial-gradient(circle at 80% 20%,rgba(57,255,159,.07),transparent 45%),#05060a;
+  transition:opacity .45s ease,transform .45s ease;cursor:pointer}
+#splash.out{opacity:0;transform:scale(1.05);pointer-events:none}
+.splash-mark{position:relative;width:136px;height:136px}
+.splash-logo{width:136px;height:136px;display:block;filter:drop-shadow(0 0 26px rgba(61,109,255,.55)) drop-shadow(0 0 3px rgba(34,230,255,.5));animation:spIn .6s cubic-bezier(.2,.9,.3,1.3) both}
+.splash-logo .sl{animation:spSlide .45s .15s ease-out both}
+.splash-logo .sb{transform-box:fill-box;transform-origin:bottom;animation:spGrow .6s cubic-bezier(.2,.9,.3,1.35) both}
+.splash-logo .sb1{animation-delay:.25s} .splash-logo .sb2{animation-delay:.42s} .splash-logo .sb3{animation-delay:.59s}
+.splash-logo .sp{stroke-dasharray:60;animation:spDraw .7s .8s cubic-bezier(.4,0,.2,1) both}
+.splash-logo .sh{stroke-dasharray:20;animation:spDrawHead .3s 1.4s ease-out both}
+.splash-logo .tip{transform-box:fill-box;transform-origin:center;opacity:0;animation:spPulse .8s 1.5s ease-out both}
+.splash-ring{position:absolute;inset:-6px;border-radius:38px;border:2px solid rgba(34,230,255,.7);opacity:0;animation:spRing 1s 1.45s ease-out both}
+.splash-name{font:700 36px/1 var(--font-display);letter-spacing:.03em;color:#eaedf6;text-shadow:0 0 22px rgba(34,230,255,.45);display:flex}
+.splash-name span{display:inline-block;animation:spLetter .45s cubic-bezier(.2,.9,.3,1.3) both}
+.splash-tag{font:500 14px var(--font-body);color:#8a92a8;letter-spacing:.02em;animation:spUp .5s 1.65s both}
+@keyframes spIn{from{opacity:0;transform:scale(.55) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes spGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes spDraw{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
+@keyframes spDrawHead{from{stroke-dashoffset:20}to{stroke-dashoffset:0}}
+@keyframes spPulse{0%{opacity:0;transform:scale(.2)}35%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(3)}}
+@keyframes spRing{0%{opacity:.9;transform:scale(.92)}100%{opacity:0;transform:scale(1.4)}}
+@keyframes spLetter{from{opacity:0;transform:translateY(14px) scale(.9);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes spUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="splash-mark"><span class="splash-ring"></span><svg class="splash-logo" viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d6dff"/><stop offset="1" stop-color="#0d1b4d"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#lg2)"/><line class="sl" x1="10" y1="51" x2="54" y2="51" stroke="#ff8a92" stroke-width="2.6" stroke-dasharray="4 3.2" stroke-linecap="round"/><rect class="sb sb1" x="13" y="35" width="9" height="12" rx="2.2" fill="#fff" opacity=".55"/><rect class="sb sb2" x="27.5" y="27" width="9" height="20" rx="2.2" fill="#fff" opacity=".8"/><rect class="sb sb3" x="42" y="18" width="9" height="29" rx="2.2" fill="#fff"/><path class="sp" d="M11 31 L24 22 L35 25 L51 11" fill="none" stroke="#5fe0a0" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path class="sh" d="M44.5 10.2 L51.6 10.6 L51.2 17.6" fill="none" stroke="#5fe0a0" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><circle class="tip" cx="51" cy="11" r="4" fill="#5fe0a0"/></svg></div><div class="splash-name"><span style="animation-delay:1.10s">S</span><span style="animation-delay:1.15s">i</span><span style="animation-delay:1.20s">z</span><span style="animation-delay:1.25s">e</span><span style="animation-delay:1.30s">W</span><span style="animation-delay:1.35s">i</span><span style="animation-delay:1.40s">s</span><span style="animation-delay:1.45s">e</span></div><div class="splash-tag">Taille juste, trade robuste</div></div>
 <div class="glowfield" aria-hidden="true"><i class="o1"></i><i class="o2"></i><i class="o3"></i><i class="o4"></i></div>
 <div class="ambient" aria-hidden="true"><span class="spark c" style="top:12%;left:82%;animation-delay:0s;animation-duration:5s"></span><span class="spark g" style="top:28%;left:8%;animation-delay:1.4s;animation-duration:6s"></span><span class="spark v" style="top:46%;left:92%;animation-delay:2.2s;animation-duration:7s"></span><span class="spark c" style="top:63%;left:14%;animation-delay:0.7s;animation-duration:5.5s"></span><span class="spark " style="top:74%;left:70%;animation-delay:3.1s;animation-duration:6.5s"></span><span class="spark g" style="top:88%;left:38%;animation-delay:1.9s;animation-duration:5s"></span><span class="spark v" style="top:8%;left:34%;animation-delay:2.8s;animation-duration:6s"></span><span class="spark " style="top:52%;left:52%;animation-delay:4s;animation-duration:7.5s"></span></div>
 <div class="wrap">
@@ -1911,7 +1937,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '10';
+const APP_VERSION = '11';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
@@ -1925,6 +1951,15 @@ function checkUpdate(){
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkUpdate(); });
 setTimeout(checkUpdate, 1500);
 render({enter:true});
+// Animation d'ouverture : disparaît d'elle-même, ou au toucher.
+(function(){
+  const sp = document.getElementById('splash');
+  if(!sp) return;
+  let gone = false;
+  function hide(){ if(gone) return; gone = true; sp.classList.add('out'); playEnter(); setTimeout(function(){ sp.remove(); }, 480); }
+  sp.addEventListener('click', hide);
+  setTimeout(hide, reduceMotion ? 250 : 2500);
+})();
 if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 })();
 </script>
