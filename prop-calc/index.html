@@ -319,6 +319,19 @@ details.more[open]>summary{margin-bottom:8px}
 .stepper button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:600 22px var(--font-num);cursor:pointer}
 .stepper button:disabled{opacity:.35;cursor:not-allowed}
 .stepper .n{font:600 22px var(--font-num);min-width:2.5ch;text-align:center}
+.plan-card{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.02)}
+.plan-card.pc-fast{border-color:rgba(255,184,77,.45);box-shadow:0 0 22px rgba(255,184,77,.1)}
+.plan-card.pc-safe{border-color:rgba(57,255,159,.45);box-shadow:0 0 22px rgba(57,255,159,.1)}
+.pc-title{font:700 14px var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pc-fast .pc-title{color:var(--warn)} .pc-safe .pc-title{color:var(--good)}
+.pc-nums{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc-nums>div{display:flex;flex-direction:column;gap:2px}
+.pc-v{font:600 26px/1.1 var(--font-num);color:var(--ink)}
+.pc-fast .pc-v{text-shadow:0 0 14px rgba(255,184,77,.4)} .pc-safe .pc-v{text-shadow:0 0 14px rgba(57,255,159,.4)}
+.pc-k{font-size:12.5px;color:var(--muted);line-height:1.3}
+.pc-desc{margin:0;font-size:14px;line-height:1.5}
+.simbar{height:8px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden}
+.simbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--good));box-shadow:0 0 12px rgba(34,230,255,.6);transition:width .2s}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -449,7 +462,7 @@ const PLANS = {
 };
 const PLAN_ORDER = ['apex50','lucid50pro','lucid50flex','tradeify100select','tradeify100growth','custom'];
 const RULE_KEYS = ['target','dd','dll','consistency','minDays','firmMax'];
-const PERSO = {configured:false, v3:true, method:'plan', nR:9, nSL:3, fixedR:300, rr:1.5, persoCap:3, maxTrades:3, maxSLDay:3, daysGoal:3,
+const PERSO = {configured:false, v3:true, winRate:null, winRR:1.5, dayTP:0, method:'plan', nR:9, nSL:3, fixedR:300, rr:1.5, persoCap:3, maxTrades:3, maxSLDay:3, daysGoal:3,
   und:'DOW', useMicro:false, autoTrail:true, goalMode:'validate', monthlyGoal:5000, tradingDays:20, tpPerDay:1};
 
 const nfCache = {};
@@ -503,6 +516,62 @@ function planFor(a){
   }
   return p;
 }
+// ---- Simulateur : chances de valider selon le plan (risque, RR, trades par jour, TP visés par jour)
+function rng(seed){
+  let s = seed >>> 0;
+  return function(){ s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+// Taux de réussite à un autre RR, en supposant que l'avantage (gain moyen par trade, en R) reste le même.
+function winProb(a, rr){
+  const p0 = a.winRate, r0 = a.winRR || 1.5;
+  const ev = p0 * r0 - (1 - p0);
+  return Math.min(0.95, Math.max(0.02, (ev + 1) / (rr + 1)));
+}
+function edgeOf(a){ return a.winRate == null ? NaN : a.winRate * (a.winRR || 1.5) - (1 - a.winRate); }
+function dayTPOf(a, P){ return (a.method !== 'plan' && a.dayTP > 0) ? a.dayTP : (P ? P.k : 1); }
+function simPlan(a, plan, trials, maxDays, seed){
+  const rnd = rng(seed);
+  const p = winProb(a, plan.rr), TPv = plan.R * plan.rr, D = plan.k * TPv, slip = 0.1 * plan.R;
+  const goal = a.size + a.target, lock = a.size + 100, cons = a.consistency > 0 ? a.consistency / 100 : 0;
+  const minD = Math.max(1, a.minDays || 1), fastDays = Math.max(Math.round(a.daysGoal || 1), minDaysOf(a));
+  let fast = 0, all = 0; const daysArr = [];
+  for(let t = 0; t < trials; t++){
+    let bal = a.size, thr = a.size - a.dd, maxDay = 0, day = 0, ok = false;
+    while(day < maxDays){
+      day++;
+      let pnl = 0, n = 0;
+      while(n < plan.N && pnl < D - 0.01){
+        if(a.dll > 0 && pnl - plan.R - slip <= -a.dll) break;   // le prochain stop toucherait la limite du jour
+        if(bal - plan.R - slip <= thr) break;                   // le prochain stop ferait perdre le compte
+        n++;
+        if(rnd() < p){ pnl += TPv; bal += TPv; } else { pnl -= plan.R; bal -= plan.R; }
+        if(bal >= goal - 0.01) break;
+      }
+      if(pnl > maxDay) maxDay = pnl;
+      if(bal <= thr + 0.01) break;
+      const consOk = !cons || maxDay <= cons * (bal - a.size) + 0.01;
+      if(bal >= goal - 0.01 && consOk){ ok = true; if(day < minD) day = minD; break; }
+      if(n === 0) break;
+      if(a.autoTrail !== false && thr < lock) thr = Math.min(Math.max(thr, bal - a.dd), lock);
+    }
+    if(ok){ all++; if(day <= fastDays) fast++; daysArr.push(day); }
+  }
+  daysArr.sort(function(x, y){ return x - y; });
+  return {fast:fast / trials, all:all / trials, med:daysArr.length ? daysArr[Math.floor(daysArr.length / 2)] : null};
+}
+function planGrid(a){
+  const lo = Math.max(25, a.dd / 20), hi = Math.min(a.dd / 2.5, a.dll > 0 ? a.dll * 0.9 : Infinity);
+  const Rs = [];
+  for(let i = 0; i < 8; i++){ const r = Math.max(25, Math.round((lo + (hi - lo) * i / 7) / 25) * 25); if(Rs.indexOf(r) < 0) Rs.push(r); }
+  const grid = [];
+  const r0 = a.winRR || 1.5;
+  const RRs = [1, 1.5, 2, 2.5, 3, 4, 5].filter(function(rr){ return rr >= Math.min(1, r0 / 2) - 1e-9 && rr <= r0 * 2 + 1e-9; });
+  Rs.forEach(function(R){ RRs.forEach(function(rr){
+    const kMax = Math.max(1, Math.ceil(a.target / (R * rr) - 1e-9));   // inutile de viser plus de TP que l'objectif du compte
+    for(let N = 1; N <= 5; N++) for(let k = 1; k <= Math.min(N, kMax); k++) grid.push({R:R, rr:rr, N:N, k:k});
+  }); });
+  return grid;
+}
 function riskUnit(a){
   if(a.method === 'plan') return planFor(a).R;
   if(a.method === 'dd') return a.nSL > 0 ? a.dd / a.nSL : NaN;
@@ -547,7 +616,7 @@ function compute(a){
   const P = planFor(a);
   const monthly = isMonthly(a);
   const goal = a.size + a.target;
-  const dailyTarget = P.D;
+  const dailyTarget = (a.method !== 'plan' && a.dayTP > 0) ? Math.min(a.dayTP * TP, monthly ? Infinity : a.target) : P.D;
   const monthPnl = a.monthPnl || 0;
   const remaining = monthly ? Math.max(0, a.monthlyGoal - monthPnl) : Math.max(0, goal - a.balance);
   const todayGoal = Math.max(0, Math.min(dailyTarget, remaining + a.pnlToday));
@@ -989,14 +1058,16 @@ function verdictHTML(a, p){
   return h;
 }
 function planStepsHTML(a, c, p){
+  const kDay = dayTPOf(a, p);
+  const nDays = isMonthly(a) ? a.tradingDays : (a.method === 'plan' ? p.n : Math.max(minDaysOf(a), Math.ceil(a.target / c.dailyTarget - 1e-9)));
   const items = [
-    '<b>Objectif du jour : ' + money(p.D) + '</b>, soit ' + pl(p.k,'TP','TP') + '. Dès qu’il est atteint, tu arrêtes.',
+    '<b>Objectif du jour : ' + money(c.dailyTarget) + '</b>, soit ' + pl(kDay,'TP','TP') + '. Dès qu’il est atteint, tu arrêtes.',
     '<b>Risque par trade : ' + money(c.R) + '</b>. C’est ce que tu perds si ton stop est touché. On l’appelle « 1R ».',
     '<b>Gain par TP : ' + money(c.TP) + '</b>, soit ' + num(a.rr, 2) + ' fois ton risque.',
     '<b>Stop de la journée</b> : ' + pl(c.daySLMax,'trade perdant','trades perdants') + ' (' + money(c.dayStop) + ') ou ' + pl(a.maxTrades,'trade pris','trades pris') + '.',
     '<b>Nombre de contrats</b> : il dépend de ton stop. Dans « Aujourd’hui », règle ton stop et l’appli te donne le nombre exact.',
-    isMonthly(a) ? 'Sur le mois : ' + a.tradingDays + ' jours × ' + money(p.D) + ' = ' + money(a.monthlyGoal) + '. Un jour raté ? On ne rattrape pas en risquant plus.'
-      : 'Validation prévue en ' + pl(p.n,'jour','jours') + ' de trading. Un jour raté ? On ne rattrape pas en risquant plus : on ajoute un jour.'
+    isMonthly(a) ? 'Sur le mois : ' + a.tradingDays + ' jours × ' + money(c.dailyTarget) + ' = ' + money(a.tradingDays * c.dailyTarget) + '. Un jour raté ? On ne rattrape pas en risquant plus.'
+      : 'Validation prévue en ' + pl(nDays,'jour','jours') + ' de trading si chaque journée est gagnée. Un jour raté ? On ne rattrape pas en risquant plus : on ajoute un jour.'
   ];
   let h = '<ol class="steps">' + items.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ol>';
   if(c.dllTight) h += '<p class="note">Avec ' + money(c.R) + ' de risque, ' + pl(a.maxSLDay,'perte','pertes') + ' toucheraient la limite journalière de la firm (' + money(a.dll) + ') : l’appli t’arrête donc à ' + pl(c.dllSafeSL,'perte','pertes') + ' par jour.</p>';
@@ -1008,11 +1079,81 @@ function rulesHTML(a, c){
     '<p class="note">Contrats autorisés maintenant : <b>' + pl(c.capMini,'mini','minis') + '</b>' + (f.next ? ' (palier suivant : ' + pl(f.next.m,'mini','minis') + ' à +' + money(f.next.p) + ' de profit)' : '') + '.</p>' +
     '<p class="note">Vérifié le ' + VERIFIED + (P.source ? ' · <a href="' + P.source + '" target="_blank" rel="noopener">source</a>' : '') + '.</p>';
 }
+/* ----- Mes chances de valider (simulation) ----- */
+const simCache = {};
+let simJob = null;
+function simKey(a){ return [a.id, a.size, a.target, a.dd, a.dll, a.consistency, a.minDays, a.daysGoal, a.winRate, a.winRR, a.autoTrail, Math.round(riskUnit(a)), a.rr, a.maxTrades, dayTPOf(a, planFor(a))].join('|'); }
+function runOptimizer(a){
+  const key = simKey(a);
+  if(simCache[key] || (simJob && simJob.key === key)) return;
+  const snap = JSON.parse(JSON.stringify(a)), grid = planGrid(snap);
+  const job = {key:key, i:0, res:[]};
+  simJob = job;
+  function step(){
+    if(simJob !== job) return;
+    const end = Math.min(grid.length, job.i + 30);
+    for(; job.i < end; job.i++) job.res.push(Object.assign({}, grid[job.i], simPlan(snap, grid[job.i], 400, 40, 1000 + job.i)));
+    const bar = document.getElementById('sim-bar');
+    if(bar) bar.style.width = Math.round(job.i / grid.length * 100) + '%';
+    if(job.i < grid.length){ setTimeout(step, 0); return; }
+    const byFast = job.res.slice().sort(function(x, y){ return y.fast - x.fast || y.all - x.all; }).slice(0, 6);
+    const byAll = job.res.slice().sort(function(x, y){ return y.all - x.all || (x.med || 99) - (y.med || 99); }).slice(0, 6);
+    const refined = byFast.concat(byAll).map(function(g, j){ return Object.assign({}, g, simPlan(snap, g, 5000, 60, 77 + j)); });
+    const fastBest = refined.slice().sort(function(x, y){ return y.fast - x.fast || y.all - x.all; })[0];
+    const safeBest = refined.slice().sort(function(x, y){ return y.all - x.all || (x.med || 99) - (y.med || 99); })[0];
+    const P = planFor(snap), curPlan = {R:riskUnit(snap), rr:snap.rr, N:snap.maxTrades, k:dayTPOf(snap, P)};
+    simCache[key] = {fastBest:fastBest, safeBest:safeBest, current:Object.assign({}, curPlan, simPlan(snap, curPlan, 5000, 60, 4242)), tested:grid.length};
+    simJob = null;
+    if(ui.tab === 'plan' && !ui.wiz && cur().id === snap.id){ setHTML('o-chances', chancesHTML(cur())); postRender(); }
+  }
+  setTimeout(step, 40);
+}
+function pctTxt(x){ return x < 0.005 ? 'moins de 1 %' : pct(x); }
+function planDesc(g){
+  return 'Risque <b>' + money(g.R) + '</b> par trade · TP à <b>' + num(g.rr, 1) + 'R</b> (+' + money(g.R * g.rr) + ') · ' + pl(g.N,'trade','trades') + ' max par jour · tu arrêtes après ' + pl(g.k,'TP gagné','TP gagnés') + '.';
+}
+function contractNote(a, g){
+  const c = compute(a), key = c.keyMain, I = INSTR[key], sl = c.sl;
+  if(!(sl > 0)) return '';
+  const n = Math.floor(g.R / (sl * I.pv) + 1e-9), cap = c.capMainNow;
+  if(n >= 1 && n <= cap) return '<p class="note">Avec ton stop de ' + num(sl, I.dec) + ' pts : ' + n + ' ' + I.label + '.</p>';
+  if(n > cap) return '<p class="note">Avec ton stop de ' + num(sl, I.dec) + ' pts, il faudrait ' + n + ' ' + I.label + ', plus que ta limite de ' + cap + '. Il faut un stop d’au moins ' + num(Math.ceil(g.R / (cap * I.pv) / I.tick) * I.tick, I.dec) + ' pts.</p>';
+  return '<p class="note">Avec ton stop de ' + num(sl, I.dec) + ' pts, même 1 ' + I.label + ' dépasse ce risque : passe en micro ou réduis ton stop.</p>';
+}
+function winChipsHTML(a){
+  return '<p class="note">Sur 10 trades à ' + num(a.winRR || a.rr, 1) + 'R, tu en gagnes combien ?</p><div class="chips">' + [3,4,5,6,7].map(function(v){
+    return '<button class="chipbtn" data-act="set-win" data-k="' + v + '" aria-pressed="' + (a.winRate != null && Math.round(a.winRate * 10) === v) + '">' + v + '</button>';
+  }).join('') + '</div>';
+}
+function chancesHTML(a){
+  if(a.winRate == null) return '<p class="lead-sm">Pour calculer tes vraies chances, il me faut un seul chiffre.</p>' + winChipsHTML(a) +
+    '<p class="note">Regarde ton journal de trading ou les résultats de l’algo. Sans ce chiffre, impossible de savoir quel plan est le meilleur pour toi.</p>';
+  const r = simCache[simKey(a)];
+  if(!r){ runOptimizer(a); return winChipsHTML(a) + '<p class="note">Je teste ' + planGrid(a).length + ' plans avec les règles de ta firm…</p><div class="simbar"><i id="sim-bar"></i></div>'; }
+  const days = pl(Math.max(Math.round(a.daysGoal || 1), minDaysOf(a)), 'jour', 'jours');
+  const same = function(x, y){ return Math.abs(x.R - y.R) < 1 && x.rr === y.rr && x.N === y.N && x.k === y.k; };
+  function card(title, g, cls, use){
+    return '<div class="plan-card ' + cls + '"><div class="pc-title">' + title + '</div>' +
+      '<div class="pc-nums"><div><span class="pc-v">' + pctTxt(g.fast) + '</span><span class="pc-k">de valider en ' + days + '</span></div>' +
+      '<div><span class="pc-v">' + pctTxt(g.all) + '</span><span class="pc-k">de valider tout court' + (g.med ? ', en ' + pl(g.med,'jour','jours') + ' environ' : '') + '</span></div></div>' +
+      '<p class="pc-desc">' + planDesc(g) + '</p>' + contractNote(a, g) +
+      (use ? '<button class="btn primary" data-act="use-plan" data-r="' + g.R + '" data-rr="' + g.rr + '" data-n="' + g.N + '" data-k="' + g.k + '">Utiliser ce plan</button>' : '') + '</div>';
+  }
+  let h = winChipsHTML(a) + card('Ton plan actuel', r.current, 'pc-cur', false);
+  if(!same(r.fastBest, r.current)) h += card('Le plus rapide pour valider en ' + days, r.fastBest, 'pc-fast', true);
+  if(!same(r.safeBest, r.current) && !same(r.safeBest, r.fastBest)) h += card('Le plus sûr pour valider', r.safeBest, 'pc-safe', true);
+  if(same(r.fastBest, r.current) && same(r.safeBest, r.current)) h += '<p class="alert warn">Ton plan actuel est déjà le meilleur sur les deux tableaux.</p>';
+  if(!(edgeOf(a) > 0)) h += '<p class="alert bad">À ce taux de réussite, ta stratégie perd de l’argent à long terme. Aucun plan n’est vraiment bon : valider devient une loterie. Travaille d’abord ta stratégie en démo.</p>';
+  h += '<p class="note">' + r.tested + ' plans testés, chacun simulé des milliers de fois avec les règles de ta firm (perte max, limite par jour, consistance). On suppose que ton niveau reste le même quand tu changes de RR : ' +
+    Math.round(a.winRate * 10) + ' sur 10 à ' + num(a.winRR || 1.5, 1) + 'R, c’est environ ' + num(winProb(a, 2) * 10, 1) + ' sur 10 à 2R et ' + num(winProb(a, 3) * 10, 1) + ' sur 10 à 3R.</p>';
+  return h;
+}
 function planTabHTML(a, c, p){
   if(!a.configured) return '<section class="panel setup-cta"><h2>Pas encore de plan</h2><p class="lead">Réponds à 5 questions simples et je te calcule ton plan complet.</p><button class="btn primary big" data-act="wiz-open">Calculer mon plan</button></section>';
   const V = VERDICT[p.verdict] || VERDICT.ok;
   return '<section class="panel"><h2>Mon objectif</h2><p class="lead">' + goalSentence(a) + '</p><button class="btn ghost" data-act="wiz-open">Modifier mon objectif</button></section>' +
-    '<section class="panel verdict ' + V[1] + '" id="o-verdict"><h2>Est-ce réaliste ?</h2>' + verdictHTML(a, p) + '</section>' +
+    (isEval(a) ? '<section class="panel chances"><h2>Mes chances de valider</h2><div id="o-chances" class="col">' + chancesHTML(a) + '</div></section>' : '') +
+    (a.method === 'plan' && (a.winRate == null || !isEval(a)) ? '<section class="panel verdict ' + V[1] + '" id="o-verdict"><h2>Est-ce réaliste ?</h2>' + verdictHTML(a, p) + '</section>' : '') +
     '<section class="panel"><h2>Mon plan, chaque jour</h2><div id="o-steps">' + planStepsHTML(a, c, p) + '</div></section>' +
     '<section class="panel"><h2>Les règles de ' + esc((PLANS[a.plan] || PLANS.custom).name) + ' (' + phaseOf(a).label.toLowerCase() + ')</h2><div id="o-rules" class="col">' + rulesHTML(a, c) + '</div></section>';
 }
@@ -1117,8 +1258,8 @@ function firmOfPlan(pk){ const f = FIRMS.find(function(x){ return x.plans.indexO
 function wizOpen(mode){
   const a = cur();
   const d = mode === 'new'
-    ? {firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', useMicro:false, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
-    : {firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays, und:a.und, useMicro:a.useMicro, persoCap:a.persoCap, maxTrades:a.maxTrades, rr:a.rr, custom:{size:a.size, target:a.target, dd:a.dd, dll:a.dll}};
+    ? {winRate:null, firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', useMicro:false, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
+    : {winRate:a.winRate == null ? null : a.winRate, firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays, und:a.und, useMicro:a.useMicro, persoCap:a.persoCap, maxTrades:a.maxTrades, rr:a.rr, custom:{size:a.size, target:a.target, dd:a.dd, dll:a.dll}};
   ui.wiz = {mode:mode, step: mode === 'goal' ? 'goal' : 'firm', d:d};
   closeModal();
   render({enter:true});
@@ -1227,6 +1368,7 @@ function wizardHTML(){
       body = '<p class="note">Les valeurs conseillées sont déjà remplies. Change-les seulement si tu veux.</p>' +
         stepper('Contrats max (en mini)', 'persoCap', d.persoCap, 1, fm, 1) +
         stepper('Trades max par jour', 'maxTrades', d.maxTrades, 1, 10, 1) +
+        '<div class="stepper-row"><span>Sur 10 trades, combien tu en gagnes ?</span></div>' + chips('wz-win', ['?', 3, 4, 5, 6, 7], d.winRate == null ? '?' : Math.round(d.winRate * 10), function(v){ return v === '?' ? 'Je ne sais pas' : v; }) +
         '<div class="stepper-row"><span>Ton TP = combien de fois ton risque ?</span></div>' + chips('wz-rr', [1, 1.5, 2, 3], d.rr, function(v){ return num(v, 1) + 'R'; });
       break;
     }
@@ -1252,7 +1394,7 @@ function applyWizard(){
   a.goalMode = a.phase === 'eval' ? 'validate' : 'monthly';
   a.daysGoal = d.daysGoal; a.monthlyGoal = d.monthlyGoal; a.tradingDays = d.tradingDays;
   a.und = d.und; a.useMicro = d.useMicro; a.persoCap = d.persoCap; a.maxTrades = d.maxTrades; a.rr = d.rr;
-  a.method = 'plan'; a.configured = true;
+  a.method = 'plan'; a.configured = true; a.winRate = d.winRate; a.winRR = d.rr;
   ui.wiz = null; ui.tab = 'plan'; prevSlots = null;
   render({enter:true}); touch();
   window.scrollTo(0, 0);
@@ -1287,6 +1429,7 @@ function wizAct(act, btn){
     case 'wz-und': d.und = btn.dataset.k; render(); return true;
     case 'wz-size': d.useMicro = btn.dataset.k === 'micro'; render(); return true;
     case 'wz-rr': d.rr = +btn.dataset.k; render(); return true;
+    case 'wz-win': d.winRate = btn.dataset.k === '?' ? null : +btn.dataset.k / 10; render(); return true;
     case 'wz-inc': { const k = btn.dataset.f; d[k] = Math.max(1, Math.round((d[k] + (+btn.dataset.d)) * 100) / 100); render(); return true; }
   }
   return false;
@@ -1551,6 +1694,10 @@ function handleAct(btn){
       const nv = Math.round(((a.sl[a.und] || U.defSL) + (act === 'sl-inc' ? U.bstep : -U.bstep)) * 100) / 100;
       a.sl[a.und] = Math.max(U.rstep, nv); syncSL(''); renderOutputs(); touch(); buzz(5); return;
     }
+    case 'set-win': a.winRate = +btn.dataset.k / 10; if(!a.winRR) a.winRR = a.rr; break;
+    case 'use-plan':
+      a.method = 'fixed'; a.fixedR = +btn.dataset.r; a.rr = +btn.dataset.rr; a.maxTrades = +btn.dataset.n; a.dayTP = +btn.dataset.k; a.maxSLDay = Math.max(1, +btn.dataset.n);
+      toast('Nouveau plan appliqué'); confetti(40); break;
     case 'set-days': a.daysGoal = +btn.dataset.k; toast('Plan recalculé sur ' + pl(a.daysGoal,'jour','jours')); break;
     case 'set-month': a.monthlyGoal = +btn.dataset.k; toast('Objectif du mois : ' + money(a.monthlyGoal)); break;
     case 'und': a.und = btn.dataset.k; break;
@@ -1632,7 +1779,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '7';
+const APP_VERSION = '8';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
