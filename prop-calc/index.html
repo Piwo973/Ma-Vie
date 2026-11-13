@@ -367,6 +367,14 @@ details.more[open]>summary{margin-bottom:8px}
 @keyframes spRing{0%{opacity:.9;transform:scale(.92)}100%{opacity:0;transform:scale(1.4)}}
 @keyframes spLetter{from{opacity:0;transform:translateY(14px) scale(.9);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
 @keyframes spUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.plan-bar{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+.pb-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pb-k{font:700 12px var(--font-display);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.pb-v{font-size:13.5px;line-height:1.4;color:var(--ink)}
+.plan-bar .btn{min-height:40px;padding:8px 14px;flex:0 0 auto}
+#plan-manage{scroll-margin-top:150px}
+.plan-actions{display:flex;flex-direction:column;gap:8px}
+.plan-actions .btn{width:100%}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -1095,10 +1103,21 @@ function dayOutHTML(a, c){
       '<button class="btn" data-act="log-be">À zéro<small>0 $</small></button></div>' +
     '<div id="o-log">' + logHTML(a) + '</div>';
 }
+function planSummary(a, c){
+  const kDay = dayTPOf(a, c.plan);
+  return 'Risque ' + money(c.R) + ' par trade · TP à ' + num(a.rr, 1) + 'R (+' + money(c.TP) + ') · ' + pl(a.maxTrades, 'trade', 'trades') + ' max par jour · tu coupes après ' + pl(kDay, 'TP', 'TP') + '.';
+}
+function planActionsHTML(){
+  return '<div class="plan-actions">' +
+    '<button class="btn ghost" data-act="plan-pick">Voir d’autres propositions</button>' +
+    '<button class="btn ghost" data-act="plan-redo">Refaire mon plan</button>' +
+    '<button class="btn danger" data-act="plan-delete">' + (ui.confirmPlanDel ? 'Confirmer : supprimer le plan' : 'Supprimer ce plan') + '</button></div>';
+}
 function todayTabHTML(a, c){
   let h = '';
   if(!a.configured) h += '<section class="panel setup-cta"><h2>Configure ce compte</h2><p class="lead">Dis-moi ce que tu veux faire avec ce compte, je calcule tout : risque, contrats, objectif du jour.</p><button class="btn primary big" data-act="wiz-open">Commencer (30 secondes)</button></section>';
   h += '<section class="status ' + c.status.cls + '" id="o-status" aria-live="polite">' + statusHTML(a, c) + '</section>';
+  if(a.configured) h += '<section class="panel plan-bar"><div class="pb-text"><span class="pb-k">Ton plan</span><span class="pb-v">' + planSummary(a, c) + '</span></div><button class="btn ghost" data-act="plan-manage">Changer</button></section>';
   h += '<section class="panel hero"><h2>Ton prochain trade</h2>' + heroSegHTML(a) + slControlHTML(a) + '<div id="o-trade" class="col">' + tradeOutHTML(a, c) + '</div></section>';
   h += '<section class="panel"><h2>Ta journée</h2><div id="o-day" class="col">' + dayOutHTML(a, c) + '</div>' +
     '<details class="more"><summary>Résultat différent (partiel, sortie manuelle…)</summary><div class="inline">' + field('Montant en $ (négatif si perte)', 'customPnl', '') + '<button class="btn primary" data-act="log-custom">Ajouter</button></div></details></section>';
@@ -1241,7 +1260,8 @@ function chancesHTML(a){
 function planTabHTML(a, c, p){
   if(!a.configured) return '<section class="panel setup-cta"><h2>Pas encore de plan</h2><p class="lead">Réponds à 5 questions simples et je te calcule ton plan complet.</p><button class="btn primary big" data-act="wiz-open">Calculer mon plan</button></section>';
   const V = VERDICT[p.verdict] || VERDICT.ok;
-  return '<section class="panel"><h2>Mon objectif</h2><p class="lead">' + goalSentence(a) + '</p><button class="btn ghost" data-act="wiz-open">Modifier mon objectif</button></section>' +
+  return '<section class="panel" id="plan-manage"><h2>Mon objectif</h2><p class="lead">' + goalSentence(a) + '</p>' +
+      '<p class="note">Ton plan : ' + planSummary(a, c) + '</p>' + planActionsHTML() + '</section>' +
     (isEval(a) ? '<section class="panel chances"><h2>Mes chances de valider</h2><div id="o-chances" class="col">' + chancesHTML(a) + '</div></section>' : '') +
     (a.method === 'plan' && (a.winRate == null || !isEval(a)) ? '<section class="panel verdict ' + V[1] + '" id="o-verdict"><h2>Est-ce réaliste ?</h2>' + verdictHTML(a, p) + '</section>' : '') +
     '<section class="panel"><h2>Mon plan, chaque jour</h2><div id="o-steps">' + planStepsHTML(a, c, p) + '</div></section>' +
@@ -1347,13 +1367,13 @@ const FIRMS = [
 const SL_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[2,3,4,5,6,8,10], NQ:[8,10,15,20,25,30,40]};
 const TICK_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[20,30,40,50,60,80,100], NQ:[30,40,60,80,100,120,160]};
 function firmOfPlan(pk){ const f = FIRMS.find(function(x){ return x.plans.indexOf(pk) >= 0; }); return f ? f.k : 'other'; }
-function wizOpen(mode){
+function wizOpen(mode, start){
   const a = cur();
   const d = mode === 'new'
     ? {winRate:null, firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', sl:UND.DOW.defSL, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
     : {winRate:a.winRate == null ? null : a.winRate, firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays,
        und:a.und, sl:(a.sl && a.sl[a.und]) || UND[a.und].defSL, persoCap:a.persoCap, maxTrades:a.maxTrades, rr:a.rr, custom:{size:a.size, target:a.target, dd:a.dd, dll:a.dll}};
-  ui.wiz = {mode:mode, step: mode === 'goal' ? 'goal' : 'firm', d:d};
+  ui.wiz = {mode:mode, step: start || (mode === 'goal' ? 'goal' : 'firm'), d:d};
   closeModal();
   render({enter:true});
   window.scrollTo(0, 0);
@@ -1830,11 +1850,28 @@ function addTrade(a, label, v){
 function handleAct(btn){
   const act = btn.dataset.act;
   if(act !== 'delete') ui.confirmDelete = false;
+  if(act !== 'plan-delete') ui.confirmPlanDel = false;
   if(wizAct(act, btn)) return;
   switch(act){
     case 'tab': ui.tab = btn.dataset.k; render({enter:true}); window.scrollTo(0, 0); return;
     case 'unit': if(state.unitMode !== btn.dataset.k){ state.unitMode = btn.dataset.k; render(); touch(); toast(btn.dataset.k === 'ticks' ? 'Stops affichés en ticks' : 'Stops affichés en points'); } return;
     case 'wiz-open': wizOpen('edit'); return;
+    case 'plan-pick': ui.confirmPlanDel = false; wizOpen('edit', 'suggest'); return;
+    case 'plan-redo': ui.confirmPlanDel = false; wizOpen('edit', 'goal'); return;
+    case 'plan-manage':
+      ui.tab = 'plan'; ui.confirmPlanDel = false; render({enter:true});
+      setTimeout(function(){ const el = document.getElementById('plan-manage'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
+      return;
+    case 'plan-delete': {
+      if(!ui.confirmPlanDel){ ui.confirmPlanDel = true; btn.textContent = 'Confirmer : supprimer le plan'; buzz(10); return; }
+      ui.confirmPlanDel = false;
+      const a0 = cur();
+      a0.configured = false; a0.method = 'plan'; a0.dayTP = 0; a0.persoCap = 3; a0.maxTrades = 3; a0.maxSLDay = 3; a0.rr = 1.5; a0.useMicro = false;
+      ui.tab = 'today'; prevSlots = null;
+      render({enter:true}); touch(); window.scrollTo(0, 0);
+      toast('Plan supprimé. Tu peux en refaire un.');
+      return;
+    }
     case 'wiz-goal': wizOpen('goal'); return;
     case 'select': state.selected = btn.dataset.id; ui.wiz = null; ui.adding = false; ui.settingsOpen = false; prevSlots = null; render({enter:true}); touch(); return;
     case 'add': wizOpen('new'); return;
@@ -1937,7 +1974,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '11';
+const APP_VERSION = '12';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
