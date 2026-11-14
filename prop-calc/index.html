@@ -42,6 +42,7 @@ h1{font:700 22px/1.1 var(--font-display);letter-spacing:.01em;margin:0;text-wrap
 .tab small{display:block;font:500 11px var(--font-body);opacity:.8}
 .tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .tab.add{color:var(--accent);border-style:dashed;background:transparent}
+.tab.add[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
 main{display:flex;flex-direction:column;gap:14px;padding-top:14px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px}
 h2{font:700 15px/1.2 var(--font-display);margin:0;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -297,6 +298,31 @@ details.more[open]>summary{margin-bottom:8px}
 .choice .btn small{font:400 13px/1.35 var(--font-body);color:var(--muted);margin-top:3px}
 .choice .btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent),0 0 18px rgba(34,230,255,.25)}
 .choice .btn.blocked{text-decoration:line-through}
+.voice-cta{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid rgba(34,230,255,.45);background:linear-gradient(135deg,rgba(34,230,255,.12),rgba(57,255,159,.05));color:var(--ink);border-radius:14px;padding:12px 14px;cursor:pointer;box-shadow:0 0 22px rgba(34,230,255,.12);font:inherit}
+.voice-cta svg{flex:0 0 auto;width:36px;height:36px;padding:8px;border-radius:50%;background:var(--accent);color:var(--accent-ink);box-shadow:0 0 14px rgba(34,230,255,.5)}
+.voice-cta b{display:block;font:600 15px/1.3 var(--font-body)}
+.voice-cta small{display:block;color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:2px}
+.voice-cta:active{transform:scale(.98)}
+.voice-box{position:relative}
+.voice-box textarea{font:500 16px/1.45 var(--font-body);min-height:118px;padding:12px 66px 12px 12px;resize:vertical;border-radius:12px}
+.mic{position:absolute;right:10px;bottom:12px;width:48px;height:48px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 18px rgba(34,230,255,.5);transition:background-color .2s,transform .1s}
+.mic:active{transform:scale(.92)}
+.mic svg{width:22px;height:22px}
+.mic.on{background:var(--bad);color:#fff;animation:micpulse 1.2s ease-out infinite}
+@keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(255,61,139,.6)}100%{box-shadow:0 0 0 18px rgba(255,61,139,0)}}
+.vrows{display:flex;flex-direction:column;margin:0;padding:2px 12px;list-style:none;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
+.vrow{display:grid;grid-template-columns:84px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.35}
+.vrow:last-child{border-bottom:none}
+.vrow .vk{color:var(--muted);font:600 11.5px var(--font-body);text-transform:uppercase;letter-spacing:.06em}
+.vrow .vv{font-weight:500;min-width:0}
+.vrow .vv small{color:var(--muted);font-weight:400}
+.vtag{font:600 11px var(--font-body);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.vtag.ok{background:var(--good-soft);color:var(--good)}
+.vtag.keep,.vtag.def{background:rgba(255,255,255,.06);color:var(--muted)}
+.vtag.ask{background:var(--warn-soft);color:var(--warn)}
+.vsum{font-size:14px;margin:0}
+.vex{display:block;text-align:left;font-weight:500;line-height:1.4;padding:8px 0}
+@media (prefers-reduced-motion: reduce){.mic.on{animation:none}}
 .wiz{gap:16px}
 .wiz-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .dots{display:flex;gap:6px}
@@ -375,6 +401,9 @@ details.more[open]>summary{margin-bottom:8px}
 #plan-manage{scroll-margin-top:150px}
 .plan-actions{display:flex;flex-direction:column;gap:8px}
 .plan-actions .btn{width:100%}
+.plan-actions .btn{display:flex;align-items:center;justify-content:center;gap:8px}
+.btn .ico{width:18px;height:18px;flex:0 0 auto}
+.setup-cta .voice-cta{margin-top:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -1111,11 +1140,12 @@ function planActionsHTML(){
   return '<div class="plan-actions">' +
     '<button class="btn ghost" data-act="plan-pick">Voir d’autres propositions</button>' +
     '<button class="btn ghost" data-act="plan-redo">Refaire mon plan</button>' +
+    '<button class="btn ghost" data-act="voice-start">' + MIC_SVG.replace('<svg ', '<svg class="ico" ') + 'Dicter un nouveau plan</button>' +
     '<button class="btn danger" data-act="plan-delete">' + (ui.confirmPlanDel ? 'Confirmer : supprimer le plan' : 'Supprimer ce plan') + '</button></div>';
 }
 function todayTabHTML(a, c){
   let h = '';
-  if(!a.configured) h += '<section class="panel setup-cta"><h2>Configure ce compte</h2><p class="lead">Dis-moi ce que tu veux faire avec ce compte, je calcule tout : risque, contrats, objectif du jour.</p><button class="btn primary big" data-act="wiz-open">Commencer (30 secondes)</button></section>';
+  if(!a.configured) h += '<section class="panel setup-cta"><h2>Configure ce compte</h2><p class="lead">Dis-moi ce que tu veux faire avec ce compte, je calcule tout : risque, contrats, objectif du jour.</p><button class="btn primary big" data-act="wiz-open">Commencer (30 secondes)</button>' + voiceCtaHTML().replace('voice-open', 'voice-start') + '</section>';
   h += '<section class="status ' + c.status.cls + '" id="o-status" aria-live="polite">' + statusHTML(a, c) + '</section>';
   if(a.configured) h += '<section class="panel plan-bar"><div class="pb-text"><span class="pb-k">Ton plan</span><span class="pb-v">' + planSummary(a, c) + '</span></div><button class="btn ghost" data-act="plan-manage">Changer</button></section>';
   h += '<section class="panel hero"><h2>Ton prochain trade</h2>' + heroSegHTML(a) + slControlHTML(a) + '<div id="o-trade" class="col">' + tradeOutHTML(a, c) + '</div></section>';
@@ -1258,7 +1288,7 @@ function chancesHTML(a){
   return h;
 }
 function planTabHTML(a, c, p){
-  if(!a.configured) return '<section class="panel setup-cta"><h2>Pas encore de plan</h2><p class="lead">Réponds à 5 questions simples et je te calcule ton plan complet.</p><button class="btn primary big" data-act="wiz-open">Calculer mon plan</button></section>';
+  if(!a.configured) return '<section class="panel setup-cta"><h2>Pas encore de plan</h2><p class="lead">Réponds à 5 questions simples et je te calcule ton plan complet.</p><button class="btn primary big" data-act="wiz-open">Calculer mon plan</button>' + voiceCtaHTML().replace('voice-open', 'voice-start') + '</section>';
   const V = VERDICT[p.verdict] || VERDICT.ok;
   return '<section class="panel" id="plan-manage"><h2>Mon objectif</h2><p class="lead">' + goalSentence(a) + '</p>' +
       '<p class="note">Ton plan : ' + planSummary(a, c) + '</p>' + planActionsHTML() + '</section>' +
@@ -1367,18 +1397,350 @@ const FIRMS = [
 const SL_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[2,3,4,5,6,8,10], NQ:[8,10,15,20,25,30,40]};
 const TICK_CHOICES = {DOW:[15,20,25,30,40,50,60], GOLD:[20,30,40,50,60,80,100], NQ:[30,40,60,80,100,120,160]};
 function firmOfPlan(pk){ const f = FIRMS.find(function(x){ return x.plans.indexOf(pk) >= 0; }); return f ? f.k : 'other'; }
+/* VOICE-PARSER-START */
+// Comprend une phrase dictée (« Lucid Flex 50K, valider en 2 jours, US30, stop 25 ticks, 5 sur 10 »).
+// Renvoie seulement ce qui a été dit ; rien n'est deviné.
+const VN_UNITS = {zero:0, un:1, une:1, deux:2, trois:3, quatre:4, cinq:5, six:6, sept:7, huit:8, neuf:9, dix:10, onze:11, douze:12, treize:13,
+  quatorze:14, quinze:15, seize:16, vingt:20, vingts:20, trente:30, quarante:40, cinquante:50, soixante:60};
+function vnWords(s){
+  const toks = s.split(/(\s+|-)/);
+  const out = [];
+  let seq = null;
+  function flush(){
+    if(!seq) return;
+    let total = 0, cur = 0;
+    seq.vals.forEach(function(v){
+      if(v === 100) cur = (cur || 1) * 100;
+      else if(v === 1000){ total += (cur || 1) * 1000; cur = 0; }
+      else if(v === 20 && cur > 0 && cur < 10) cur = cur * 20;   // quatre-vingt
+      else cur += v;
+    });
+    out.push(String(total + cur));
+    seq = null;
+  }
+  for(let i = 0; i < toks.length; i++){
+    const t = toks[i];
+    if(/^(\s+|-)$/.test(t)){ if(!seq) out.push(t); continue; }
+    let v = null;
+    if(t === 'cent' || t === 'cents') v = 100;
+    else if(t === 'mille') v = 1000;
+    else if(t in VN_UNITS && t !== 'un' && t !== 'une') v = VN_UNITS[t];
+    else if((t === 'un' || t === 'une') && seq) v = 1;
+    else if(t === 'et' && seq){
+      const nx = (toks.slice(i + 1).find(function(x){ return !/^(\s+|-)$/.test(x); }) || '');
+      if(nx === 'un' || nx === 'une' || nx === 'onze') continue;
+    }
+    if(v != null){ if(!seq) seq = {vals:[]}; seq.vals.push(v); continue; }
+    if(seq){ flush(); out.push(' '); }
+    out.push(t);
+  }
+  flush();
+  return out.join('').replace(/ {2,}/g, ' ');
+}
+function vnNorm(text){
+  let s = ' ' + String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '') + ' ';
+  s = s.replace(/[’`´]/g, "'").replace(/[  ]/g, ' ');
+  s = s.replace(/(\d),(\d)/g, '$1.$2').replace(/[,;!?()]/g, ' ').replace(/\.(?!\d)/g, ' ');
+  s = s.replace(/\bpour ?cents?\b|\bpourcents?\b/g, ' % ');
+  s = s.replace(/\b(un|une) (jour|journee|seance|session|semaine|trade|contrat|seul)/g, '1 $2');
+  s = vnWords(s);
+  s = s.replace(/\bus\s*-?\s*(30|100)\b/g, 'us$1').replace(/\bnas\s*100\b/g, 'nas100');
+  s = s.replace(/(\d)[ ](?=\d{3}\b)/g, '$1');                     // 5 000 -> 5000
+  s = s.replace(/(\d+(?:\.\d+)?)\s?k\b/g, function(m, n){ return String(Math.round(parseFloat(n) * 1000)); });
+  s = s.replace(/[%$€\/:=+]/g, function(c){ return ' ' + c + ' '; });
+  s = s.replace(/[,;!?()]/g, ' ').replace(/\.(?!\d)/g, ' ').replace(/\s+/g, ' ');
+  return s;
+}
+const VN_TICK = '(?:ticks?|tics?|tiques?|tips?|pips?)', VN_PTS = '(?:points?|pts?)';
+const VN_NUM = '(\\d+(?:\\.\\d+)?)';
+function vnUnit(u){ return !u ? null : new RegExp('^' + VN_PTS + '$').test(u) ? 'points' : 'ticks'; }
+function parseVoice(text){
+  const s = vnNorm(text), r = {notes:[]};
+  const has = function(re){ return re.test(s); };
+  let m;
+  // Firm et compte
+  if(has(/\btop ?step\b|\btopstep/)) r.unsupported = 'Topstep';
+  if(has(/\bapex\b|\bapec\b|\bapexe\b/)){ r.firm = 'apex'; r.plan = 'apex50'; }
+  if(has(/\blucid|\blucide|\blucy\b/)){
+    r.firm = 'lucid';
+    if(has(/\bflex|\bflexible\b/)) r.plan = 'lucid50flex';
+    else if(has(/\bpro\b|\bprof\b/)) r.plan = 'lucid50pro';
+    else if(has(/\bdaily\b|\bdirect\b/)) r.unsupported = 'Lucid ' + (has(/\bdaily\b/) ? 'Daily' : 'Direct');
+  }
+  if(has(/\btrad[a-z]*f[iy][a-z]*\b|\btrade if\b|\btrade fi\b/)){
+    r.firm = 'tradeify';
+    if(has(/\bgrowth\b|\bgrowt\b|\bgrows\b/)) r.plan = 'tradeify100growth';
+    else if(has(/\bselect|\bselection\b|\bselecte\b/)) r.plan = 'tradeify100select';
+    else if(has(/\bflex\b|\bdaily\b/)) r.plan = 'tradeify100select';
+  }
+  if(!r.firm && has(/\b(?:autre|ma propre|une autre) (?:firm|firme|prop)/)) { r.firm = 'other'; r.plan = 'custom'; }
+  if((m = s.match(/\b(25|50|100|150)000\b/))) r.size = +m[1] * 1000;
+  // Phase
+  const evalKw = has(/\bvalider\b|\bvalidation\b|\beval|\bchallenge\b|\bcombine\b|\bpasser (?:le|mon|l')|\breussir (?:le|mon|l')/);
+  const fundKw = has(/\bfinance|\bfunded\b|\bdeja valide|\bcompte valide|\best valide|\bai valide|\bpa\b|\blive\b|\bpayouts?\b|\bretraits?\b/);
+  // Objectif mensuel, jours de trading par mois, puis jours pour valider
+  let rest = s;
+  if((m = rest.match(new RegExp(VN_NUM + '\\s*jours?\\s*(?:de trading\\s*)?(?:par|dans le|sur le|chaque|/)\\s*mois')))){
+    const n = Math.round(+m[1]); if(n >= 4 && n <= 23) r.tradingDays = n;
+    rest = rest.replace(m[0], ' ');
+  }
+  const moneyRe = '\\s*(?:\\$|€|euros?|dollars?|balles)?\\s*(?:nets?\\s*)?';
+  if((m = rest.match(new RegExp(VN_NUM + moneyRe + '(?:par mois|/ mois|mensuels?|chaque mois|tous les mois|le mois|sur le mois|a la fin du mois)')))
+    || (m = rest.match(new RegExp('(?:par mois|chaque mois|tous les mois)\\s*(?:de\\s*)?' + VN_NUM + '\\s*(?:\\$|€|euros?|dollars?)')))){
+    const v = +m[1]; if(v >= 100 && v <= 100000) r.monthlyGoal = Math.round(v);
+    rest = rest.replace(m[0], ' ');
+  }
+  if((m = rest.match(new RegExp('(?:en|sous|dans|d\'ici|max|maximum|pendant|sur)\\s*' + VN_NUM + '\\s*(semaines?)')))
+    || (m = rest.match(new RegExp(VN_NUM + '\\s*(semaines?)\\b')))){
+    r.daysGoal = Math.min(30, Math.max(1, Math.round(+m[1] * 5)));
+  } else if((m = rest.match(new RegExp('(?:en|sous|dans|d\'ici|max|maximum|pendant|sur)\\s*' + VN_NUM + '\\s*(?:jours?|j|journees?|seances?|sessions?)\\b')))
+    || (m = rest.match(new RegExp(VN_NUM + '\\s*(?:jours?|journees?|seances?)\\b(?!\\s*(?:de trading|par mois))')))){
+    const n = Math.round(+m[1]); if(n >= 1 && n <= 30) r.daysGoal = n;
+  } else if(has(/\baujourd'hui\b|\ben 1 fois\b|\bdans la journee\b/)) r.daysGoal = 1;
+  // Phase déduite
+  if(fundKw && !(evalKw && r.daysGoal && !r.monthlyGoal && !has(/\bfinance|\bfunded\b|\bdeja valide/))) r.phase = 'funded';
+  else if(evalKw || r.daysGoal) r.phase = 'eval';
+  else if(r.monthlyGoal) r.phase = 'funded';
+  if(r.phase === 'funded' && r.monthlyGoal == null && r.daysGoal && !has(/\bfinance|\bfunded\b|\bdeja valide/)) r.phase = 'eval';
+  if(r.firm === 'tradeify' && r.plan === 'tradeify100select' && r.phase !== 'eval'){
+    if(has(/\bdaily\b|\bquotidien/)){ r.phase = 'funded'; r.fundedKind = 'daily'; }
+    else if(has(/\bflex\b/)){ r.phase = 'funded'; r.fundedKind = 'flex'; }
+  }
+  // Marché (le premier cité)
+  const mk = [];
+  [['DOW', /\bus30\b|\bdow\b|\bdow jones\b|\bym\b|\bmym\b|\bdj30\b|\bwall street\b/],
+   ['GOLD', /\bgold\b|\bgolds?\b|\bgc\b|\bmgc\b|\bxau|\bl'or\b|\bl or\b|\bmetaux\b|\bsur or\b/],
+   ['NQ', /\bnasdaq|\bnas100\b|\bnas\b|\bnq\b|\bmnq\b|\bus100\b|\bnasdac?\b/]].forEach(function(x){
+    const i = s.search(x[1]); if(i >= 0) mk.push([i, x[0]]);
+  });
+  mk.sort(function(a, b){ return a[0] - b[0]; });
+  if(mk.length){ r.und = mk[0][1]; if(mk.length > 1) r.otherMarkets = mk.slice(1).map(function(x){ return x[1]; }); }
+  // Stop et TP
+  const U = '(' + VN_TICK + '|' + VN_PTS + ')';
+  const notMoney = '(?!\\s*(?:\\$|€|euros?|dollars?|balles))';
+  const stopRe = [
+    new RegExp('\\b(?:stop ?loss|stoploss|stop|sl)\\s*(?:loss\\s*)?(?:de|a|d\'environ|environ|autour de|vers|:|=|fait|est de|a peu pres)?\\s*(?:de\\s*)?(?:environ\\s*)?' + VN_NUM + notMoney + '\\s*' + U + '?'),
+    new RegExp(VN_NUM + '\\s*' + U + '\\s*(?:de\\s*)?(?:stop|sl)\\b')
+  ];
+  for(let i = 0; i < stopRe.length && r.stopVal == null; i++){
+    if((m = s.match(stopRe[i]))){ r.stopVal = +m[1]; r.stopUnit = vnUnit(m[2]); }
+  }
+  if((m = s.match(new RegExp('\\b(?:tp|take ?profit|objectif de gain|cible)\\s*(?:de|a|:|=)?\\s*' + VN_NUM + notMoney + '\\s*' + U + '?')))){
+    r.tpVal = +m[1]; r.tpUnit = vnUnit(m[2]);
+  }
+  if(r.stopVal == null){
+    const all = s.match(new RegExp(VN_NUM + '\\s*' + U, 'g')) || [];
+    const cand = all.filter(function(x){ return !(r.tpVal != null && parseFloat(x) === r.tpVal); });
+    if(cand.length){ const mm = cand[0].match(new RegExp(VN_NUM + '\\s*' + U)); r.stopVal = +mm[1]; r.stopUnit = vnUnit(mm[2]); }
+  }
+  // Taux de réussite
+  if((m = s.match(/(\d+)\s*(?:trades?\s*)?(?:gagnants?\s*|gagnes?\s*)?(?:sur|\/)\s*(10|20|100)\b/))){
+    const n = +m[1], d = +m[2]; if(n <= d) r.winRate = n / d;
+  }
+  if(r.winRate == null && (m = s.match(/(?:winrate|win rate|taux de reussite|taux de gain|reussite|win|winning)\s*(?:de|a|:|=|est de|d'environ|environ)?\s*(?:de\s*)?(\d+(?:\.\d+)?)\s*(?:%|pour ?cents?|pourcents?)?/))){
+    const v = +m[1]; r.winRate = v > 1 ? v / 100 : v;
+  }
+  if(r.winRate == null && (m = s.match(/(\d+(?:\.\d+)?)\s*(?:%|pour ?cents?|pourcents?)\s*(?:de\s*)?(?:reussite|winrate|win|trades? gagnants?|gagnants?|de gain|de trades gagnes)/))) r.winRate = +m[1] / 100;
+  if(r.winRate == null){
+    const re = /(\d+(?:\.\d+)?)\s*(?:%|pour ?cents?|pourcents?)/g; let x;
+    while((x = re.exec(s))){
+      const before = s.slice(Math.max(0, x.index - 28), x.index);
+      if(/consist|option|regle|drawdown|profit|split|risque|risk/.test(before)) continue;
+      const v = +x[1]; if(v >= 15 && v <= 95){ r.winRate = v / 100; break; }
+    }
+  }
+  if(r.winRate != null && !(r.winRate >= 0.1 && r.winRate <= 0.95)){ r.notes.push('Taux de réussite pas crédible, je l’ignore.'); delete r.winRate; }
+  if(r.winRate == null && has(/(?:je |j')?(?:ne )?sais pas (?:mon|combien|mon taux|trop)|aucune idee|pas de stat|pas encore de stat/)) r.winUnknown = true;
+  // RR de référence
+  if((m = s.match(/\b(?:rr|r r|risk reward|risque rendement|risque recompense|ratio)\s*(?:de|a|:|=|est de)?\s*(?:1\s*(?:pour|:|\/|sur)\s*)?(\d+(?:\.\d+)?)/))
+    || (m = s.match(/(\d+(?:\.\d+)?)\s*r\b/))
+    || (m = s.match(/(\d+(?:\.\d+)?)\s*fois\s*(?:le|mon|ton|son)?\s*(?:stop|sl|risque)/))){
+    const v = +m[1]; if(v >= 0.5 && v <= 10) r.winRR = v;
+  }
+  if(r.winRR == null && r.tpVal != null && r.stopVal > 0 && (r.tpUnit || r.stopUnit) === (r.stopUnit || r.tpUnit)){
+    const v = Math.round(r.tpVal / r.stopVal * 100) / 100; if(v >= 0.5 && v <= 10) r.winRR = v;
+  }
+  // Contrats max
+  if((m = s.match(/(?:max(?:imum)?|pas plus de|jusqu'a|au plus|au maximum)\s*(\d+)\s*contrats?/)) || (m = s.match(/(\d+)\s*contrats?\s*(?:max|maximum|au maximum|au plus)/))){
+    const n = +m[1]; if(n >= 1 && n <= 20) r.maxC = n;
+  }
+  r.norm = s.trim();
+  return r;
+}
+/* VOICE-PARSER-END */
+const MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+const VOICE_EX = [
+  'Lucid Flex 50K, je veux le valider en 2 jours sur le US30, stop 25 ticks, je gagne 5 trades sur 10',
+  'Compte Apex financé, 2 000 $ par mois sur le Nasdaq, stop 60 ticks, 6 sur 10',
+  'Tradeify Select 100K, valider en une semaine, gold, stop 30 ticks, RR 2, 45 % de réussite'
+];
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+// Fusionne ce qui a été dit avec ce que l'appli sait déjà, et liste les questions qui restent.
+function voiceResolve(w, p){
+  const a0 = cur(), base = w.voiceBase || w.d;
+  const known = w.mode !== 'new' && !!(a0 && a0.configured);
+  const d = clone(base), rows = [], warn = [], steps = [];
+  const firmLabel = function(k){ const f = FIRMS.find(function(x){ return x.k === k; }); return f ? f.label : k; };
+  // Compte
+  let planState = known ? 'keep' : 'ask', planChanged = false;
+  if(p.plan){ planChanged = !known || p.plan !== a0.plan; d.plan = p.plan; d.firm = p.firm || firmOfPlan(p.plan); planState = 'ok'; }
+  else if(p.firm && (!known || firmOfPlan(a0.plan) !== p.firm)){ d.firm = p.firm; d.plan = null; planChanged = true; planState = 'ask'; }
+  else if(!known){ d.plan = null; d.firm = null; }
+  if(p.unsupported){ warn.push(p.unsupported + ' n’est pas encore dans SizeWise : choisis ton compte juste après.'); if(!p.plan){ d.plan = null; d.firm = null; planState = 'ask'; } }
+  if(p.size && d.plan && d.plan !== 'custom' && PLANS[d.plan].size !== p.size) warn.push('Je n’ai que le ' + PLANS[d.plan].name + ' dans l’appli : je calcule sur cette taille.');
+  if(!d.plan){ if(!d.firm) steps.push('firm'); steps.push('plan'); }
+  if(d.plan === 'custom' && !(known && a0.plan === 'custom')) steps.push('custom');
+  rows.push({k:'Compte', v:d.plan ? esc(PLANS[d.plan].name) : d.firm ? firmLabel(d.firm) + ' <small>· quel compte ?</small>' : '—', s:planState});
+  // Phase et objectif
+  let phaseOk = known && !planChanged;
+  if(p.phase){
+    if(p.phase === 'eval'){ d.phase = 'eval'; phaseOk = true; }
+    else if(d.plan){
+      const fk = Object.keys(PLANS[d.plan].phases).filter(function(k){ return k !== 'eval'; });
+      if(p.fundedKind && fk.indexOf(p.fundedKind) >= 0){ d.phase = p.fundedKind; phaseOk = true; }
+      else if(fk.length === 1){ d.phase = fk[0]; phaseOk = true; }
+      else { d.phase = fk[0]; phaseOk = false; }
+    } else { d.phase = 'funded'; phaseOk = false; }
+  } else if(!phaseOk && d.plan && known && a0.plan === d.plan){ d.phase = a0.phase; phaseOk = true; }
+  if(d.plan && !PLANS[d.plan].phases[d.phase]){ d.phase = 'eval'; if(p.phase !== 'eval') phaseOk = false; }
+  if(p.daysGoal) d.daysGoal = p.daysGoal;
+  if(p.monthlyGoal) d.monthlyGoal = p.monthlyGoal;
+  if(p.tradingDays) d.tradingDays = p.tradingDays;
+  const kept = known && a0.plan === d.plan && a0.phase === d.phase;
+  const isEv = d.phase === 'eval';
+  const goalSaid = isEv ? !!p.daysGoal : !!p.monthlyGoal;
+  const goalOk = phaseOk ? (goalSaid || kept) : (p.phase === 'funded' && !!p.monthlyGoal);
+  if(!phaseOk) steps.push('phase');
+  if(!goalOk) steps.push('goal');
+  let gv;
+  if(!phaseOk && !goalOk) gv = '—';
+  else if(isEv || (!phaseOk && p.phase === 'eval')) gv = 'Valider en ' + pl(d.daysGoal, 'jour', 'jours');
+  else gv = money(d.monthlyGoal) + ' par mois <small>· ' + d.tradingDays + ' jours de trading</small>';
+  rows.push({k:'Objectif', v:gv, s:goalSaid && phaseOk ? 'ok' : (phaseOk && goalOk) ? 'keep' : 'ask'});
+  // Marché
+  let undState = known ? 'keep' : 'def', undOk = true;
+  if(p.und){ if(p.und !== d.und){ d.und = p.und; d.sl = (known && a0.sl && a0.sl[p.und]) || UND[p.und].defSL; } undState = 'ok'; }
+  if(d.plan && PLANS[d.plan].metalsBlocked && UND[d.und].metal){ warn.push('Pas d’or chez Apex (métaux suspendus depuis mars 2026) : choisis un autre marché.'); undOk = false; undState = 'ask'; }
+  if(p.otherMarkets) warn.push('Tu as cité plusieurs marchés : je calcule sur ' + UND[d.und].label + '. Refais un plan pour l’autre.');
+  if(!undOk) steps.push('market');
+  rows.push({k:'Marché', v:UND[d.und].label + (p.und || known ? '' : ' <small>· ton marché principal</small>'), s:undState});
+  // Stop
+  let slOk = known && (!p.und || p.und === a0.und) && undOk, slState = slOk ? 'keep' : 'ask';
+  if(p.stopVal != null && undOk){
+    const unit = p.stopUnit || unitMode(), U = UND[d.und];
+    const pts = Math.round((unit === 'ticks' ? p.stopVal * tickOf(d.und) : p.stopVal) / U.rstep) * U.rstep;
+    if(pts >= U.min && pts <= U.max){ d.sl = pts; slOk = true; slState = 'ok'; }
+    else { warn.push('Un stop de ' + num(p.stopVal, 2) + ' ' + unit + ' sur le ' + U.label + ', ça me paraît faux. Choisis-le juste après.'); slOk = false; slState = 'ask'; }
+  }
+  if(!slOk) steps.push('stop');
+  rows.push({k:'Stop', v:slOk ? fmtDist(d.und, d.sl, true) : '—', s:slState});
+  // Taux de réussite
+  if(p.winRR) d.winRR = p.winRR;
+  let winState;
+  if(p.winRate != null){ d.winRate = Math.round(p.winRate * 100) / 100; winState = 'ok'; }
+  else if(p.winUnknown){ d.winRate = null; winState = 'ok'; }
+  else if(known && a0.winRate != null){ d.winRate = a0.winRate; winState = 'keep'; }
+  else { winState = 'ask'; steps.push('level'); }
+  const rrTxt = ' <small>· TP à ' + num(d.winRR || 1.5, 1) + 'R</small>';
+  rows.push({k:'Réussite', v:winState === 'ask' ? '—' : d.winRate == null ? 'Je ne sais pas <small>· je pars sur 4 sur 10</small>' : num(d.winRate * 10, 1) + ' trades sur 10' + rrTxt, s:winState});
+  if(p.maxC){ d.maxC = p.maxC; rows.push({k:'Contrats', v:pl(p.maxC, 'contrat', 'contrats') + ' max', s:'ok'}); }
+  (p.notes || []).forEach(function(n){ warn.push(n); });
+  return {d:d, rows:rows, warn:warn, steps:steps};
+}
+const VTAG = {ok:'compris', keep:'gardé', def:'par défaut', ask:'je te demande'};
+function voiceOutHTML(){
+  const w = ui.wiz, t = (w.voiceText || '').trim();
+  if(!t) return '<details class="more"><summary>Exemples de phrases</summary>' + VOICE_EX.map(function(x, i){ return '<button class="linkbtn vex" data-act="voice-ex" data-i="' + i + '">« ' + esc(x) + ' »</button>'; }).join('') + '</details>';
+  const r = voiceResolve(w, parseVoice(t));
+  let h = '<ul class="vrows">' + r.rows.map(function(x){
+    return '<li class="vrow"><span class="vk">' + x.k + '</span><span class="vv">' + x.v + '</span><span class="vtag ' + x.s + '">' + VTAG[x.s] + '</span></li>';
+  }).join('') + '</ul>';
+  h += r.warn.map(function(x){ return '<p class="alert warn">' + x + '</p>'; }).join('');
+  const n = r.steps.length;
+  h += '<p class="vsum">' + (n ? 'Il me manque ' + pl(n, 'réponse', 'réponses') + ', je te ' + (n > 1 ? 'les' : 'la') + ' demande juste après. Ou complète ta phrase.' : '<b>Tout est là.</b> Je calcule tes plans.') + '</p>';
+  return h;
+}
+function voiceStepHTML(){
+  const w = ui.wiz;
+  const sr = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  return '<section class="panel wiz"><div class="wiz-head"><button class="linkbtn" data-act="wz-back"' + (w.voiceFrom ? '' : ' style="visibility:hidden"') + '>← Retour</button><span></span><button class="linkbtn" data-act="wz-close">Fermer</button></div>' +
+    '<h2 class="wiz-q">Dis-moi tout en une phrase</h2>' +
+    '<p class="note">Ta firm et ton compte, ton objectif, ton marché, ton stop, et combien de trades tu gagnes sur 10.</p>' +
+    '<div class="voice-box"><textarea id="voice-txt" rows="4" autocapitalize="sentences" placeholder="Ex : Lucid Flex 50K, valider en 2 jours, US30, stop 25 ticks, je gagne 5 trades sur 10">' + esc(w.voiceText || '') + '</textarea>' +
+    '<button class="mic" data-act="voice-mic" aria-label="Parler">' + MIC_SVG + '</button></div>' +
+    '<p class="note" id="voice-hint">' + (sr ? 'Touche le micro et parle. Ou touche le champ puis le micro du clavier.' : 'Touche le champ puis le micro du clavier pour dicter.') + '</p>' +
+    '<div id="voice-out" class="col">' + voiceOutHTML() + '</div>' +
+    '<button class="btn primary big" data-act="voice-go">Voir mes plans</button></section>';
+}
+function voiceCtaHTML(){
+  return '<button class="voice-cta" data-act="voice-open">' + MIC_SVG + '<span><b>Plus rapide : dis-le en une phrase</b><small>« Lucid Flex, valider en 2 jours, stop 25 ticks, 5 sur 10 »</small></span></button>';
+}
+let voiceRec = null;
+function voiceStop(){ if(voiceRec){ try{ voiceRec.abort(); }catch(e){} voiceRec = null; } }
+function voiceRefresh(){ setHTML('voice-out', voiceOutHTML()); }
+function voiceMic(btn){
+  const ta = document.getElementById('voice-txt');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ if(ta) ta.focus(); toast('Utilise le micro du clavier pour dicter'); return; }
+  if(voiceRec){ try{ voiceRec.stop(); }catch(e){} return; }
+  let rec;
+  try{ rec = new SR(); }catch(e){ if(ta) ta.focus(); toast('Utilise le micro du clavier pour dicter'); return; }
+  rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  const before = ta && ta.value.trim() ? ta.value.trim() + ' ' : '';
+  rec.onresult = function(e){
+    let t = '';
+    for(let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    const el = document.getElementById('voice-txt');
+    if(el && ui.wiz){ el.value = before + t; ui.wiz.voiceText = el.value; voiceRefresh(); }
+  };
+  rec.onerror = function(e){
+    if(e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Micro bloqué ici : touche le champ puis le micro du clavier');
+    else if(e.error === 'no-speech') toast('Je n’ai rien entendu, réessaie');
+    else if(e.error !== 'aborted') toast('Le micro a coupé, réessaie ou utilise le clavier');
+  };
+  rec.onend = function(){ if(voiceRec === rec) voiceRec = null; const b = document.querySelector('.mic'); if(b) b.classList.remove('on'); };
+  try{ rec.start(); voiceRec = rec; btn.classList.add('on'); buzz(12); }
+  catch(e){ voiceRec = null; if(ta) ta.focus(); toast('Utilise le micro du clavier pour dicter'); }
+}
+function voiceAct(act, btn){
+  const w = ui.wiz;
+  switch(act){
+    case 'voice-open': voiceStop(); w.voiceFrom = w.step; w.voiceBase = clone(w.d); w.only = null; w.step = 'voice'; render({enter:true}); window.scrollTo(0, 0); return true;
+    case 'voice-mic': voiceMic(btn); return true;
+    case 'voice-ex': {
+      const ta = document.getElementById('voice-txt'); w.voiceText = VOICE_EX[+btn.dataset.i] || '';
+      if(ta) ta.value = w.voiceText; voiceRefresh(); return true;
+    }
+    case 'voice-go': {
+      const t = (w.voiceText || '').trim();
+      if(!t){ toast('Dis-moi au moins ta firm et ton objectif'); const ta = document.getElementById('voice-txt'); if(ta) ta.focus(); return true; }
+      voiceStop();
+      const r = voiceResolve(w, parseVoice(t));
+      w.d = r.d; w.only = ['voice'].concat(r.steps, ['suggest']); w.step = r.steps[0] || 'suggest';
+      render({enter:true}); window.scrollTo(0, 0); buzz(10);
+      return true;
+    }
+  }
+  return false;
+}
 function wizOpen(mode, start){
   const a = cur();
   const d = mode === 'new'
-    ? {winRate:null, firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', sl:UND.DOW.defSL, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
-    : {winRate:a.winRate == null ? null : a.winRate, firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays,
+    ? {winRate:null, winRR:1.5, firm:null, plan:null, phase:'eval', daysGoal:3, monthlyGoal:2000, tradingDays:20, und:'DOW', sl:UND.DOW.defSL, persoCap:3, maxTrades:3, rr:1.5, custom:{size:50000, target:3000, dd:2000, dll:0}}
+    : {winRate:a.winRate == null ? null : a.winRate, winRR:a.winRR || 1.5, firm:firmOfPlan(a.plan), plan:a.plan, phase:a.phase, daysGoal:a.daysGoal, monthlyGoal:a.monthlyGoal, tradingDays:a.tradingDays,
        und:a.und, sl:(a.sl && a.sl[a.und]) || UND[a.und].defSL, persoCap:a.persoCap, maxTrades:a.maxTrades, rr:a.rr, custom:{size:a.size, target:a.target, dd:a.dd, dll:a.dll}};
   ui.wiz = {mode:mode, step: start || (mode === 'goal' ? 'goal' : 'firm'), d:d};
-  closeModal();
+  if(start === 'voice') ui.wiz.voiceBase = clone(d);
+  voiceStop(); closeModal();
   render({enter:true});
   window.scrollTo(0, 0);
 }
 function wizSteps(){
+  if(ui.wiz.only){
+    const o = ui.wiz.only.slice(), ip = o.indexOf('plan');
+    if(ui.wiz.d.plan === 'custom' && ip >= 0 && o.indexOf('custom') < 0) o.splice(ip + 1, 0, 'custom');
+    return o;
+  }
   if(ui.wiz.mode === 'goal') return ['goal','stop','level','suggest'];
   const s = ['firm','plan','phase','goal','market','stop','level','suggest'];
   if(ui.wiz.d.plan === 'custom') s.splice(2, 0, 'custom');
@@ -1393,7 +1755,8 @@ function draftAccount(d){
   a.daysGoal = d.daysGoal; a.monthlyGoal = d.monthlyGoal; a.tradingDays = d.tradingDays;
   a.maxTrades = d.maxTrades; a.rr = d.rr; a.persoCap = d.persoCap; a.method = 'plan';
   a.und = d.und; a.sl = defaultSL(); a.sl[d.und] = d.sl; a.useMicro = false;
-  a.winRate = d.winRate; a.winRR = 1.5;
+  a.winRate = d.winRate; a.winRR = d.winRR || 1.5;
+  if(d.maxC > 0) a.firmMax = Math.min(a.firmMax, d.maxC);
   a.balance = a.size; a.threshold = a.size - a.dd; a.pnlToday = 0; a.tradesToday = 0; a.log = []; a.monthPnl = 0; a.monthDays = 0;
   return a;
 }
@@ -1446,6 +1809,7 @@ function suggestHTML(d){
   return h;
 }
 function wizardHTML(){
+  if(ui.wiz.step === 'voice') return voiceStepHTML();
   const w = ui.wiz, d = w.d, steps = wizSteps();
   const i = Math.max(0, steps.indexOf(w.step === 'manual' ? 'suggest' : w.step));
   let q = '', body = '', canNext = true, showNext = true;
@@ -1518,7 +1882,7 @@ function wizardHTML(){
     }
     case 'level':
       q = 'Sur 10 trades, combien tu en gagnes ?';
-      body = '<p class="note">Avec un TP à 1,5 fois ton stop. Regarde ton journal ou les résultats de l’algo : c’est le chiffre qui décide de tout.</p>' +
+      body = '<p class="note">Avec un TP à ' + num(d.winRR || 1.5, 1) + ' fois ton stop. Regarde ton journal ou les résultats de l’algo : c’est le chiffre qui décide de tout.</p>' +
         chips('wz-win', [3,4,5,6,7,'?'], d.winRate == null ? '?' : Math.round(d.winRate * 10), function(v){ return v === '?' ? 'Je ne sais pas' : v; });
       break;
     case 'suggest':
@@ -1537,6 +1901,7 @@ function wizardHTML(){
     }
   }
   const last = w.step === 'manual';
+  if(i === 0 && !w.only && w.step !== 'manual' && w.step !== 'suggest') body = voiceCtaHTML() + body;
   let dots = '';
   for(let k = 0; k < steps.length; k++) dots += '<i class="' + (k <= i ? 'on' : '') + '"></i>';
   return '<section class="panel wiz"><div class="wiz-head"><button class="linkbtn" data-act="wz-back"' + (i === 0 && w.step !== 'manual' ? ' style="visibility:hidden"' : '') + '>← Retour</button><div class="dots" aria-label="Étape ' + (i + 1) + ' sur ' + steps.length + '">' + dots + '</div><button class="linkbtn" data-act="wz-close">Fermer</button></div>' +
@@ -1546,7 +1911,9 @@ function wizardHTML(){
 function applyWizard(pick){
   const w = ui.wiz, d = w.d;
   let a;
-  if(w.mode === 'new'){ a = makeAccount(d.plan); state.accounts.push(a); state.selected = a.id; }
+  // Phrase dictée sur un compte déjà configuré mais pour un autre compte : on en crée un nouveau, on n'écrase rien.
+  const asNew = w.mode === 'new' || (w.only && cur().configured && cur().plan !== d.plan);
+  if(asNew){ a = makeAccount(d.plan); state.accounts.push(a); state.selected = a.id; w.mode = 'new'; }
   else a = cur();
   const changed = w.mode === 'new' || a.plan !== d.plan || a.phase !== d.phase;
   if(changed){ a.plan = d.plan; a.phase = d.phase; resetForPhase(a); a.name = PLANS[d.plan].short; }
@@ -1557,7 +1924,7 @@ function applyWizard(pick){
   a.goalMode = a.phase === 'eval' ? 'validate' : 'monthly';
   a.daysGoal = d.daysGoal; a.monthlyGoal = d.monthlyGoal; a.tradingDays = d.tradingDays;
   a.und = d.und; if(!a.sl) a.sl = defaultSL(); a.sl[d.und] = d.sl;
-  a.winRate = d.winRate; a.winRR = 1.5; a.configured = true;
+  a.winRate = d.winRate; a.winRR = d.winRR || 1.5; a.configured = true;
   if(pick){
     a.method = 'fixed'; a.fixedR = pick.R; a.rr = pick.rr; a.maxTrades = pick.N; a.dayTP = pick.k; a.maxSLDay = Math.max(1, pick.N);
     a.useMicro = pick.unit === 'micro';
@@ -1565,20 +1932,22 @@ function applyWizard(pick){
   } else {
     a.method = 'plan'; a.persoCap = d.persoCap; a.maxTrades = d.maxTrades; a.rr = d.rr; a.useMicro = false;
   }
-  ui.wiz = null; ui.tab = 'today'; prevSlots = null;
+  voiceStop(); ui.wiz = null; ui.tab = 'today'; prevSlots = null;
   render({enter:true}); touch();
   window.scrollTo(0, 0);
-  toast('Plan enregistré, tu peux trader'); confetti(60);
+  toast(asNew && w.only ? 'Nouveau compte ajouté avec ton plan' : 'Plan enregistré, tu peux trader'); confetti(60);
 }
 function pickFromBtn(btn){ return {R:+btn.dataset.r, rr:+btn.dataset.rr, N:+btn.dataset.n, k:+btn.dataset.k, unit:btn.dataset.u, n:+btn.dataset.c}; }
 function wizAct(act, btn){
   const w = ui.wiz;
   if(!w) return false;
+  if(voiceAct(act, btn)) return true;
   const d = w.d, steps = wizSteps(), i = steps.indexOf(w.step);
   const go = function(delta){ const n = steps[i + delta]; if(n){ w.step = n; render({enter:true}); window.scrollTo(0, 0); } };
   switch(act){
-    case 'wz-close': ui.wiz = null; render({enter:true}); return true;
+    case 'wz-close': voiceStop(); ui.wiz = null; render({enter:true}); return true;
     case 'wz-back':
+      if(w.step === 'voice'){ voiceStop(); w.step = w.voiceFrom || steps[0]; w.only = null; render({enter:true}); return true; }
       if(w.step === 'manual'){ w.step = 'suggest'; render({enter:true}); return true; }
       go(-1); return true;
     case 'wz-next':
@@ -1611,6 +1980,7 @@ function wizAct(act, btn){
 }
 app.addEventListener('input', function(e){
   const t = e.target;
+  if(t.id === 'voice-txt' && ui.wiz){ ui.wiz.voiceText = t.value; voiceRefresh(); return; }
   if(t.dataset && t.dataset.w && ui.wiz){ const v = parseNum(t.value); if(isFinite(v) && v >= 0) ui.wiz.d.custom[t.dataset.w] = v; }
 });
 
@@ -1856,6 +2226,7 @@ function handleAct(btn){
     case 'tab': ui.tab = btn.dataset.k; render({enter:true}); window.scrollTo(0, 0); return;
     case 'unit': if(state.unitMode !== btn.dataset.k){ state.unitMode = btn.dataset.k; render(); touch(); toast(btn.dataset.k === 'ticks' ? 'Stops affichés en ticks' : 'Stops affichés en points'); } return;
     case 'wiz-open': wizOpen('edit'); return;
+    case 'voice-start': ui.confirmPlanDel = false; wizOpen('edit', 'voice'); return;
     case 'plan-pick': ui.confirmPlanDel = false; wizOpen('edit', 'suggest'); return;
     case 'plan-redo': ui.confirmPlanDel = false; wizOpen('edit', 'goal'); return;
     case 'plan-manage':
@@ -1974,7 +2345,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '12';
+const APP_VERSION = '13';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
