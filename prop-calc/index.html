@@ -896,7 +896,7 @@ function makeAccount(planKey){
   const a = {id:uid(), plan:planKey, phase:'eval', name:P.short};
   applyPhase(a);
   Object.keys(PERSO).forEach(function(k){ a[k] = PERSO[k]; });
-  a.sl = defaultSL(); a.tp = {};
+  a.sl = defaultSL(); a.tp = {}; a.mig14 = true;
   a.balance = a.size; a.threshold = a.size - a.dd; a.pnlToday = 0; a.tradesToday = 0; a.log = []; a.day = todayStr();
   a.month = a.day.slice(0, 7); a.monthPnl = 0; a.monthDays = 0;
   return a;
@@ -950,10 +950,21 @@ function normalize(){
     if(!Array.isArray(a.log)) a.log = [];
     if(!a.microRatio) a.microRatio = 10;
     if(!a.month){ a.month = todayStr().slice(0, 7); a.monthPnl = 0; a.monthDays = 0; }
+    // Une seule fois (v15) : Lucid Flex en évaluation passe sur le plan du mentor.
+    // Validation en 6 jours = risque ≈ 333 $ (9R pour 3 000 $), TP à 1,5R, 1 TP visé par jour, droit à une perte.
+    if(!a.mig14){
+      a.mig14 = true;
+      if(a.plan === 'lucid50flex' && a.phase === 'eval'){
+        a.daysGoal = 6; a.rr = 1.5; a.tpFree = false; a.goalAmt = 0; a.manualC = false;
+        migNote = 'Lucid Flex : 6 jours, TP à 1,5R';
+      }
+    }
   });
   if(!state.accounts.some(function(a){ return a.id === state.selected; })) state.selected = state.accounts[0].id;
 }
+let migNote = '';
 normalize();
+if(migNote) saveLocal();
 const t0 = todayStr();
 state.accounts.forEach(function(a){ rollover(a, t0); });
 
@@ -1232,8 +1243,10 @@ function goalChips(a, c){
   if(c.todayGoal > 0) out.push({k:Math.round(c.todayGoal), t:'Objectif du jour'});
   if(isEval(a) && c.remaining > 0) [2, 3].forEach(function(d){ out.push({k:Math.ceil(c.remaining / d - EPS), t:'Valider en ' + d + ' jours'}); });
   if(isFinite(c.consCap) && c.consCap > 0) out.push({k:Math.floor(c.consCap + EPS), t:'Max/jour (consistance)'});
-  const seen = {};
-  return out.filter(function(o){ if(seen[o.k + o.t]) return false; seen[o.k + o.t] = 1; return true; });
+  // Un seul bouton par montant : les libellés identiques sont regroupés
+  const byK = {}, list = [];
+  out.forEach(function(o){ if(byK[o.k]) byK[o.k].t += ' · ' + o.t; else { byK[o.k] = {k:o.k, t:o.t}; list.push(byK[o.k]); } });
+  return list;
 }
 function goalPanelHTML(a, c){
   const cur0 = Math.round(goalAmtOf(a, c));
@@ -2554,7 +2567,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '14';
+const APP_VERSION = '15';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
@@ -2568,6 +2581,7 @@ function checkUpdate(){
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkUpdate(); });
 setTimeout(checkUpdate, 1500);
 render({enter:true});
+if(migNote) setTimeout(function(){ toast(migNote); }, reduceMotion ? 500 : 2800);
 // Animation d'ouverture : disparaît d'elle-même, ou au toucher.
 (function(){
   const sp = document.getElementById('splash');
