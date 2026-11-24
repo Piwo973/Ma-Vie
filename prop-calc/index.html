@@ -299,6 +299,15 @@ details.more[open]>summary{margin-bottom:8px}
 .bignum.md{font-size:46px}
 .chips.sm .chipbtn{padding:8px 12px;font-size:13px;min-width:0}
 .chipbtn small{display:block;font:500 11px var(--font-body);opacity:.8;margin-top:1px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.02)}
+.opt.cur{border-color:rgba(34,230,255,.6);box-shadow:0 0 14px rgba(34,230,255,.15)}
+.opt>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.opt b{font:600 14.5px var(--font-body)}
+.opt-d{font:500 12.5px/1.4 var(--font-num);color:var(--muted)}
+.opt .btn{min-height:40px;padding:8px 12px}
+.tag{display:inline-block;font:600 11px var(--font-body);padding:2px 8px;border-radius:999px;margin:4px 4px 0 0;background:var(--warn-soft);color:var(--warn)}
+.tag.good{background:var(--good-soft);color:var(--good)}
 .chipbtn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:11px 16px;font:600 15px var(--font-num);cursor:pointer;min-width:56px;transition:background-color .2s,color .2s,box-shadow .2s,transform .1s}
 .chipbtn:active{transform:scale(.94)}
 .chipbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 16px rgba(34,230,255,.45)}
@@ -1264,16 +1273,41 @@ function goalOutHTML(a, c){
   const T = Math.ceil(amt / (n * tickUsd) - EPS);
   const slT = c.sl > 0 ? Math.round(c.sl / I.tick) : 0;
   const rr = slT > 0 ? T / slT : NaN;
-  let h = '<div class="answer"><span class="bignum md">' + nf(0).format(T) + '</span><span class="unit">ticks</span><span class="answer-cap">de TP avec ' + n + ' ' + I.label + '</span></div>' +
-    '<p class="answer-sub">= ' + num(T * I.tick, I.dec) + ' points · <b>+' + money(T * n * tickUsd) + '</b>' + (slT > 0 ? ' · ton stop de ' + nf(0).format(slT) + ' ticks = −' + money(slT * n * tickUsd) + ' · gain/risque <b>' + num(rr, 1) + '</b>' : '') + '</p>';
-  if(T > 1) h += '<p class="note">Ou en plusieurs trades gagnants : ' + [2, 3].map(function(k){ return k + ' × ' + nf(0).format(Math.ceil(T / k - EPS)) + ' ticks'; }).join(' · ') + '.</p>';
-  if(rr > 4) h += '<p class="alert warn">TP ' + num(rr, 1) + ' fois plus grand que ton stop : c’est un très gros mouvement à attraper en un trade. Plus réaliste : plusieurs trades, ou plus de contrats si ton risque le permet.</p>';
+  const per = n * tickUsd, slUsd = slT * per;
+  let h = '<p class="answer-sub">Pour <b>+' + money(amt) + '</b> avec ' + n + ' ' + I.label + (slT > 0 ? ' · ton stop de ' + nf(0).format(slT) + ' ticks = −' + money(slUsd) + ' par trade' : '') + '</p>';
+  // Plusieurs façons d'y arriver : en 1, 2 ou 3 trades gagnants, ou au RR de ton plan
+  const curT = Math.round(c.tpPts / I.tick);
+  const planT = slT > 0 ? Math.max(1, Math.round(slT * a.rr)) : 0;
+  const opts = [1, 2, 3].map(function(k){ return {k:k, T:Math.ceil(amt / (k * per) - EPS)}; })
+    .filter(function(o){ return o.k === 1 || !(slT > 0) || o.T / slT >= 0.9; });
+  if(planT > 0){
+    const kPlan = Math.ceil(amt / (planT * per) - EPS);
+    const same = opts.filter(function(o){ return o.T === planT; })[0];
+    if(same) same.plan = true; else opts.push({k:kPlan, T:planT, plan:true});
+  }
+  opts.sort(function(x, y){ return x.k - y.k; });
+  // Montant d'une journée (objectif du jour, max de consistance) : on compare aux trades permis par jour
+  const daily = amt <= Math.max(c.todayGoal || 0, isFinite(c.consCap) ? c.consCap : 0, isFinite(c.dailyTarget) ? c.dailyTarget : 0) + 0.5;
+  h += '<div class="opts">' + opts.map(function(o){
+    const rr = slT > 0 ? o.T / slT : NaN, gain = o.T * per;
+    const w1 = slT > 0 ? Math.ceil((amt + slUsd) / gain - EPS) : NaN;
+    const tags = [];
+    if(o.plan) tags.push('<span class="tag good">ton plan · ' + num(a.rr, 2) + ' × le stop</span>');
+    if(rr > 3) tags.push('<span class="tag">gros mouvement</span>');
+    if(daily && o.k > a.maxTrades) tags.push('<span class="tag">plus que tes ' + a.maxTrades + ' trades par jour</span>');
+    const isCur = o.T === curT;
+    return '<div class="opt' + (isCur ? ' cur' : '') + '"><div><b>' + (o.k === 1 ? 'En 1 trade' : 'En ' + o.k + ' trades gagnants') + '</b>' +
+      '<span class="opt-d">' + nf(0).format(o.T) + ' ticks' + (o.k > 1 ? ' chacun' : '') + ' (' + num(o.T * I.tick, I.dec) + ' pts) · +' + money(gain) + (o.k > 1 ? ' par trade' : '') + (isFinite(rr) ? ' · gain/risque ' + num(rr, 1) : '') + '</span>' +
+      (isFinite(w1) ? '<span class="opt-d">' + (w1 > o.k ? 'Avec 1 stop en route : ' + pl(w1, 'gagnant', 'gagnants') + ' au lieu de ' + o.k : 'Tu peux prendre 1 stop et quand même y arriver') + '</span>' : '') +
+      (tags.length ? '<span>' + tags.join('') + '</span>' : '') + '</div>' +
+      '<button class="btn ' + (isCur ? 'primary' : 'ghost') + '" data-act="tp-goal" data-t="' + o.T + '">' + (isCur ? 'Choisi' : 'Choisir') + '</button></div>';
+  }).join('') + '</div>';
   if(!isMonthly(a) && isFinite(c.consCap) && amt > c.consCap + 0.5){
     const ph = phaseOf(a);
     h += '<p class="alert warn">Au-dessus de <b>' + money(c.consCap) + '</b>, le maximum par jour avec ta règle de consistance (' + a.consistency + ' %) : il faut au moins <b>' + pl(c.minDays, 'jour', 'jours') + '</b> pour valider.' +
       (ph.consOpt && a.consistency < ph.consOpt ? ' Avec l’option ' + ph.consOpt + ' % prise à l’achat : ' + pl(Math.ceil(100 / ph.consOpt - EPS), 'jour', 'jours') + ' (à régler dans Mon plan).' : '') + '</p>';
   }
-  h += '<button class="btn ghost" data-act="tp-goal" data-t="' + T + '">Mettre mon TP à ' + nf(0).format(T) + ' ticks</button>';
+  h += '<button class="linkbtn" data-act="see-scen">Combien de trades pour valider, selon tes pertes →</button>';
   const cap = Math.max(1, c.trade.firmSize || 1), step = I.micro ? Math.max(1, Math.round(cap / 6)) : 1, ks = [];
   for(let k = step; k <= cap; k += step) ks.push(k);
   if(ks[ks.length - 1] !== cap) ks.push(cap);
@@ -2188,6 +2222,8 @@ function renderOutputs(){
   setHTML('o-tp-mode', tpModeHTML(a, c));
   setHTML('o-nc-note', ncNoteHTML(a, c));
   setHTML('o-goal', goalOutHTML(a, c));
+  const gNow = Math.round(goalAmtOf(a, c));
+  app.querySelectorAll('[data-act="goal-set"]').forEach(function(b){ b.setAttribute('aria-pressed', String(+b.dataset.k === gNow)); });
   setHTML('o-day', dayOutHTML(a, c));
   setHTML('o-progress', progressOutHTML(a, c));
   setHTML('o-scen', scenHTML(a, c));
@@ -2434,6 +2470,10 @@ function handleAct(btn){
       toast('Plan supprimé. Tu peux en refaire un.');
       return;
     }
+    case 'see-scen':
+      ui.tab = 'account'; render({enter:true});
+      setTimeout(function(){ const el = document.getElementById('o-scen'); if(el) el.closest('section').scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
+      return;
     case 'wiz-goal': wizOpen('goal'); return;
     case 'select': state.selected = btn.dataset.id; ui.wiz = null; ui.adding = false; ui.settingsOpen = false; prevSlots = null; render({enter:true}); touch(); return;
     case 'add': wizOpen('new'); return;
@@ -2567,7 +2607,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '15';
+const APP_VERSION = '16';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
