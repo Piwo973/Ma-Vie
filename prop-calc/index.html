@@ -289,6 +289,16 @@ details.more[open]>summary{margin-bottom:8px}
 .btn.big{min-height:56px;font-size:16px;width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
+/* Curseurs stop / TP avec leur équivalent en dollars */
+.usd{font:500 13px/1.45 var(--font-num);color:var(--muted);margin:4px 0 0}
+.usd b{font-weight:600}
+.usd .neg{color:var(--bad)} .usd .pos{color:var(--good)}
+#f-tpr{accent-color:var(--good)}
+.tp-mode{font:600 12.5px var(--font-body);color:var(--muted)}
+.tp-mode .linkbtn{font-size:12.5px}
+.bignum.md{font-size:46px}
+.chips.sm .chipbtn{padding:8px 12px;font-size:13px;min-width:0}
+.chipbtn small{display:block;font:500 11px var(--font-body);opacity:.8;margin-top:1px}
 .chipbtn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:11px 16px;font:600 15px var(--font-num);cursor:pointer;min-width:56px;transition:background-color .2s,color .2s,box-shadow .2s,transform .1s}
 .chipbtn:active{transform:scale(.94)}
 .chipbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 16px rgba(34,230,255,.45)}
@@ -485,11 +495,12 @@ const PLANS = {
   lucid50flex: {name:'Lucid 50K Flex', short:'Lucid Flex', size:50000, microRatio:10, metalsBlocked:false,
     source:'https://tradetanto.com/learn/lucid-trading-rules-explained-every-plan-rule-and-limit',
     phases:{
-      eval:{label:'Évaluation', target:3000, dd:2000, dll:0, consistency:50, minDays:2, firmMax:4, scaling:null, rules:[
+      eval:{label:'Évaluation', target:3000, dd:2000, dll:0, consistency:40, consOpt:50, minDays:1, firmMax:4, scaling:null, rules:[
         'Objectif : +3 000 $.',
         'Drawdown : 2 000 $ EOD, bloqué à 50 100 $ une fois 52 100 $ atteint.',
         'Pas de limite journalière (sauf si tu as pris l’option à l’achat).',
-        'Consistance 50 % à la validation : ton meilleur jour ne doit pas dépasser 50 % du profit total, donc 2 jours minimum.',
+        'Consistance 40 % à la validation : ton meilleur jour ne doit pas dépasser 40 % du profit total (1 200 $ si tu valides pile à 3 000 $), donc 3 jours minimum.',
+        'Option 50 % payante à l’achat : 2 jours minimum. Elle ne se change plus une fois le compte actif.',
         'Contrats : 4 minis / 40 micros.']},
       funded:{label:'Financé', target:3000, dd:2000, dll:0, consistency:0, minDays:5, firmMax:4, scaling:[{p:0,m:2}], rules:[
         'Pas de limite journalière, pas de consistance.',
@@ -498,7 +509,7 @@ const PLANS = {
   tradeify100select: {name:'Tradeify 100K Select', short:'Tradeify 100K', size:100000, microRatio:10, metalsBlocked:false,
     source:'https://intercom.help/tradeify/en/articles/12853921-select-evaluation-accounts',
     phases:{
-      eval:{label:'Évaluation', target:6000, dd:3000, dll:0, consistency:40, minDays:3, firmMax:8, scaling:null, rules:[
+      eval:{label:'Évaluation', target:6000, dd:3000, dll:0, consistency:40, consOpt:50, minDays:1, firmMax:8, scaling:null, rules:[
         'Objectif : +6 000 $.',
         'Drawdown : 3 000 $ EOD, bloqué à 100 100 $.',
         'Pas de limite journalière.',
@@ -536,7 +547,8 @@ const PLANS = {
 const PLAN_ORDER = ['apex50','lucid50pro','lucid50flex','tradeify100select','tradeify100growth','custom'];
 const RULE_KEYS = ['target','dd','dll','consistency','minDays','firmMax'];
 const PERSO = {configured:false, v3:true, winRate:null, winRR:1.5, dayTP:0, method:'plan', nR:9, nSL:3, fixedR:300, rr:1.5, persoCap:3, maxTrades:3, maxSLDay:3, daysGoal:3,
-  und:'DOW', useMicro:false, autoTrail:true, goalMode:'validate', monthlyGoal:5000, tradingDays:20, tpPerDay:1};
+  und:'DOW', useMicro:false, autoTrail:true, goalMode:'validate', monthlyGoal:5000, tradingDays:20, tpPerDay:1,
+  manualC:false, nC:1, tpFree:false, goalAmt:0};
 
 const nfCache = {};
 function nf(d){ return nfCache[d] || (nfCache[d] = new Intl.NumberFormat('fr-FR',{maximumFractionDigits:d, minimumFractionDigits:0})); }
@@ -696,6 +708,19 @@ function contractsFor(risk, slPts, key, cap){
   const used = Math.max(0, Math.min(n, cap));
   return {key:key, n:n, used:used, capped:n > cap, risk:used * slPts * I.pv};
 }
+// TP en points : réglé au curseur, sinon stop × RR arrondi au tick
+function tpPtsOf(a){
+  const U = UND[a.und] || UND.DOW, t = INSTR[U.mini].tick;
+  if(a.tpFree && a.tp && a.tp[a.und] > 0) return a.tp[a.und];
+  const sl = (a.sl && a.sl[a.und] > 0) ? a.sl[a.und] : 0;
+  return Math.round(sl * a.rr / t + EPS) * t;
+}
+// Contrats maximum autorisés par la firm, dans la taille choisie (mini ou micro)
+function ncMax(a){
+  const U = UND[a.und] || UND.DOW, key = a.useMicro ? U.micro : U.mini;
+  const cap = firmCapNow(a).cap * (INSTR[key].micro ? (a.microRatio || 10) : 1);
+  return cap > 0 ? cap : 99;
+}
 function slMaxFor(risk, k, key){
   const I = INSTR[key];
   if(!(risk > 0) || !(k > 0)) return 0;
@@ -714,7 +739,7 @@ function compute(a){
   const todayGoal = Math.max(0, Math.min(dailyTarget, remaining + a.pnlToday));
   const dayDone = todayGoal > 0 && a.pnlToday >= todayGoal - 0.5;
   const dayTargetLeft = Math.max(0, todayGoal - a.pnlToday);
-  const tpLeftToday = TP > 0 ? Math.ceil(dayTargetLeft / TP - EPS) : NaN;
+  let tpLeftToday = TP > 0 ? Math.ceil(dayTargetLeft / TP - EPS) : NaN;
   const monthDaysLeft = monthly ? Math.max(0, a.tradingDays - (a.monthDays || 0)) : NaN;
   const daysAtPlan = monthly && dailyTarget > 0 ? Math.ceil(remaining / dailyTarget - EPS) : NaN;
   const buffer = a.balance - a.threshold;
@@ -777,9 +802,25 @@ function compute(a){
   const sl = (a.sl && a.sl[a.und] > 0) ? a.sl[a.und] : 0;
   const main = block ? {key:keyMain, n:0, used:0, capped:false, risk:0} : contractsFor(riskNext, sl, keyMain, capOf(keyMain));
   const alt = block ? {key:keyAlt, n:0, used:0, capped:false, risk:0} : contractsFor(riskNext, sl, keyAlt, capOf(keyAlt));
-  const tpPts = sl * a.rr;
+  // TP : lié au RR du plan, ou réglé librement au curseur
+  const tpFree = !!(a.tpFree && a.tp && a.tp[a.und] > 0);
+  const tpPts = tpPtsOf(a);
   const tpGain = main.used * tpPts * INSTR[keyMain].pv;
   const capMainNow = capOf(keyMain);
+  // Trade réellement pris : contrats calculés (auto) ou choisis à la main
+  const pvMain = INSTR[keyMain].pv;
+  const firmSize = INSTR[keyMain].micro ? firm.cap * ratio : firm.cap;
+  const nPick = Math.max(1, Math.round(a.nC || 1));
+  const nTrade = a.manualC ? nPick : main.used;
+  const trade = {n:nTrade, manual:!!a.manualC, slPer:sl * pvMain, tpPer:tpPts * pvMain,
+    risk:nTrade * sl * pvMain, gain:nTrade * tpPts * pvMain, rr:sl > 0 ? tpPts / sl : NaN,
+    overBudget:riskNext > 0 && nTrade * sl * pvMain > riskNext + 0.5, overPerso:nTrade > capMainNow, overFirm:firmSize > 0 && nTrade > firmSize,
+    one:sl * pvMain, firmSize:firmSize};
+  // Valeurs enregistrées par « TP touché / Stop touché » : celles du trade réglé à la main, sinon celles du plan
+  const custom = (a.manualC || tpFree) && nTrade > 0 && sl > 0;
+  const tpVal = custom ? trade.gain : TP;
+  const slVal = custom ? trade.risk : R;
+  tpLeftToday = tpVal > 0 ? Math.ceil(dayTargetLeft / tpVal - EPS) : NaN;
   let rows = [];
   if(!block && riskNext > 0){
     const step = INSTR[keyMain].micro ? Math.max(1, Math.round(capMainNow / 6)) : 1;
@@ -823,6 +864,7 @@ function compute(a){
     days:days, pace:pace, paceTP:paceTP, paceTooFast:paceTooFast, daysForCons:daysForCons, scen:scen, breakEven:breakEven,
     U:U, keyMain:keyMain, keyAlt:keyAlt, firm:firm, persoCap:persoCap, capMini:capMini, capLimiter:capLimiter, capMainNow:capMainNow,
     riskNext:riskNext, riskReason:riskReason, block:block, sl:sl, main:main, alt:alt, tpPts:tpPts, tpGain:tpGain, rows:rows,
+    tpFree:tpFree, trade:trade, custom:custom, tpVal:tpVal, slVal:slVal,
     metalBlocked:metalBlocked, status:status};
 }
 
@@ -854,7 +896,7 @@ function makeAccount(planKey){
   const a = {id:uid(), plan:planKey, phase:'eval', name:P.short};
   applyPhase(a);
   Object.keys(PERSO).forEach(function(k){ a[k] = PERSO[k]; });
-  a.sl = defaultSL();
+  a.sl = defaultSL(); a.tp = {};
   a.balance = a.size; a.threshold = a.size - a.dd; a.pnlToday = 0; a.tradesToday = 0; a.log = []; a.day = todayStr();
   a.month = a.day.slice(0, 7); a.monthPnl = 0; a.monthDays = 0;
   return a;
@@ -904,6 +946,7 @@ function normalize(){
     Object.keys(PERSO).forEach(function(k){ if(a[k] === undefined) a[k] = PERSO[k]; });
     if(!a.sl || typeof a.sl !== 'object') a.sl = defaultSL();
     UND_ORDER.forEach(function(k){ if(!(a.sl[k] > 0)) a.sl[k] = UND[k].defSL; });
+    if(!a.tp || typeof a.tp !== 'object') a.tp = {};
     if(!Array.isArray(a.log)) a.log = [];
     if(!a.microRatio) a.microRatio = 10;
     if(!a.month){ a.month = todayStr().slice(0, 7); a.monthPnl = 0; a.monthDays = 0; }
@@ -1046,7 +1089,7 @@ function unitSegHTML(){
     '<button role="radio" data-act="unit" data-k="ticks" aria-checked="' + (unitMode() === 'ticks') + '">Ticks</button>' +
     '<button role="radio" data-act="unit" data-k="points" aria-checked="' + (unitMode() === 'points') + '">Points</button></div>';
 }
-function slControlHTML(a){
+function slControlHTML(a, c){
   const U = UND[a.und], v = a.sl[a.und];
   const ticks = unitMode() === 'ticks', lo = toUnit(a.und, U.min), hi = toUnit(a.und, U.max), u = ticks ? 'ticks' : 'pts';
   return '<div class="field big full"><div class="sl-head"><label for="f-sl">La taille de ton stop, en ' + (ticks ? 'ticks' : 'points') + '</label>' + unitSegHTML() + '</div>' +
@@ -1054,7 +1097,78 @@ function slControlHTML(a){
     '<input id="f-sl" data-f="sl" type="number" inputmode="decimal" step="any" value="' + esc(toUnit(a.und, v)) + '">' +
     '<button type="button" data-act="sl-inc" aria-label="Agrandir le stop">+</button></div>' +
     '<input id="f-slr" data-f="sl" type="range" min="' + lo + '" max="' + hi + '" step="' + (ticks ? 1 : U.rstep) + '" value="' + Math.min(hi, Math.max(lo, toUnit(a.und, v))) + '" aria-label="Glisse pour régler ton stop">' +
-    '<div class="range-scale"><span>' + nf(2).format(lo) + ' ' + u + '</span><span>' + (Math.abs(tickOf(a.und) - 1) > 1e-9 ? '1 point = ' + Math.round(1 / tickOf(a.und)) + ' ticks' : '1 point = 1 tick') + '</span><span>' + nf(2).format(hi) + ' ' + u + '</span></div></div>';
+    '<div class="range-scale"><span>' + nf(2).format(lo) + ' ' + u + '</span><span>' + (Math.abs(tickOf(a.und) - 1) > 1e-9 ? '1 point = ' + Math.round(1 / tickOf(a.und)) + ' ticks' : '1 point = 1 tick') + '</span><span>' + nf(2).format(hi) + ' ' + u + '</span></div>' +
+    '<p class="usd" id="o-sl-usd">' + slUsdHTML(a, c) + '</p></div>';
+}
+// Équivalent en dollars du stop et du TP, pour 1 contrat et pour le nombre de contrats du trade
+function slUsdHTML(a, c){
+  const I = INSTR[c.keyMain], t = c.trade;
+  if(!(c.sl > 0)) return '';
+  return '1 ' + I.label + ' : <b class="neg">−' + money(t.slPer) + '</b>' + (t.n > 1 ? ' · ' + t.n + ' ' + I.label + ' : <b class="neg">−' + money(t.risk) + '</b>' : '') +
+    ' · 1 tick = ' + num(I.pv * I.tick, 2) + ' $';
+}
+function tpUsdHTML(a, c){
+  const I = INSTR[c.keyMain], t = c.trade;
+  if(!(c.tpPts > 0)) return '';
+  return '1 ' + I.label + ' : <b class="pos">+' + money(t.tpPer) + '</b>' + (t.n > 1 ? ' · ' + t.n + ' ' + I.label + ' : <b class="pos">+' + money(t.gain) + '</b>' : '') +
+    (isFinite(t.rr) ? ' · gain/risque ' + num(t.rr, 2) : '');
+}
+function tpModeHTML(a, c){
+  return c.tpFree ? '<button class="linkbtn" data-act="tp-rr">Remettre à ' + num(a.rr, 2) + ' × le stop</button>' : 'lié à ton plan : ' + num(a.rr, 2) + ' × le stop';
+}
+function tpControlHTML(a, c){
+  const U = UND[a.und], v = tpPtsOf(a);
+  const ticks = unitMode() === 'ticks', lo = toUnit(a.und, U.min), hi = toUnit(a.und, U.max * 3), u = ticks ? 'ticks' : 'pts';
+  return '<div class="field big full"><div class="sl-head"><label for="f-tp">Ton TP (objectif), en ' + (ticks ? 'ticks' : 'points') + '</label><span class="tp-mode" id="o-tp-mode">' + tpModeHTML(a, c) + '</span></div>' +
+    '<div class="sl-row"><button type="button" data-act="tp-dec" aria-label="Rapprocher le TP">−</button>' +
+    '<input id="f-tp" data-f="tp" type="number" inputmode="decimal" step="any" value="' + esc(round2(toUnit(a.und, v))) + '">' +
+    '<button type="button" data-act="tp-inc" aria-label="Éloigner le TP">+</button></div>' +
+    '<input id="f-tpr" data-f="tp" type="range" min="' + lo + '" max="' + hi + '" step="' + (ticks ? 1 : U.rstep) + '" value="' + Math.min(hi, Math.max(lo, toUnit(a.und, v))) + '" aria-label="Glisse pour régler ton TP">' +
+    '<div class="range-scale"><span>' + nf(2).format(lo) + ' ' + u + '</span><span>' + nf(2).format(hi) + ' ' + u + '</span></div>' +
+    '<p class="usd" id="o-tp-usd">' + tpUsdHTML(a, c) + '</p></div>';
+}
+function ncNoteHTML(a, c){
+  const I = INSTR[c.keyMain];
+  return 'En ' + I.label + ' · ta règle : ' + c.capMainNow + ' max · la firm : ' + c.trade.firmSize + ' max' + (c.main.used > 0 ? ' · le mode Auto en prendrait ' + c.main.used : '');
+}
+function contractsControlHTML(a, c){
+  const I = INSTR[c.keyMain];
+  let h = '<div class="field full"><label>Nombre de contrats</label><div class="seg c2" role="radiogroup" aria-label="Nombre de contrats">' +
+    '<button role="radio" data-act="cmode" data-k="auto" aria-checked="' + !a.manualC + '">Auto<small>selon mon risque</small></button>' +
+    '<button role="radio" data-act="cmode" data-k="manual" aria-checked="' + !!a.manualC + '">Je choisis<small>nombre libre</small></button></div>';
+  if(a.manualC){
+    h += '<div class="sl-row"><button type="button" data-act="nc-dec" aria-label="Un contrat de moins">−</button>' +
+      '<input id="f-nc" data-f="nC" type="number" inputmode="numeric" step="1" min="1" value="' + Math.max(1, Math.round(a.nC || 1)) + '" aria-label="Nombre de ' + I.label + '">' +
+      '<button type="button" data-act="nc-inc" aria-label="Un contrat de plus">+</button></div>' +
+      '<p class="usd" id="o-nc-note">' + ncNoteHTML(a, c) + '</p>';
+  }
+  return h + '</div>';
+}
+function legsHTML(a, c, risk, gain){
+  return '<div class="trade-legs">' +
+    '<div class="leg sl"><span class="k">Ton stop</span><span class="v">' + fmtDist(a.und, c.sl, true) + '</span><span class="s">si touché : −' + money(risk) + '</span></div>' +
+    '<div class="leg tp"><span class="k">Ton objectif (TP)</span><span class="v">' + fmtDist(a.und, c.tpPts, true) + '</span><span class="s">si touché : +' + money(gain) + '</span></div></div>';
+}
+// Trade avec un nombre de contrats choisi à la main : on montre tout, et on prévient si ça dépasse le plan.
+function manualTradeHTML(a, c, reasons){
+  const I = INSTR[c.keyMain], t = c.trade, k = Math.max(1, a.maxSLDay || 1), dayLoss = k * t.risk;
+  let h = '<div class="answer"><span class="bignum">' + t.n + '</span><span class="unit">' + I.label + '</span><span class="answer-cap">choisi' + (t.n > 1 ? 's' : '') + ' à la main</span></div>';
+  if(c.block && reasons[c.block]) h += '<p class="alert ' + (/done|Done/.test(c.block) ? 'warn' : 'bad') + '">' + reasons[c.block] + '</p>';
+  h += legsHTML(a, c, t.risk, t.gain);
+  if(isFinite(t.rr)) h += '<p class="answer-sub">Gain / risque : <b>1 pour ' + num(t.rr, 2) + '</b> · tu gagnes dès ' + pct(1 / (1 + t.rr)) + ' de trades gagnants</p>';
+  if(t.overFirm) h += '<p class="alert bad">La firm n’autorise que ' + t.firmSize + ' ' + I.label + ' en ce moment.</p>';
+  else if(t.overPerso) h += '<p class="alert warn">Au-dessus de ta règle perso : ' + c.capMainNow + ' ' + I.label + ' max.</p>';
+  if(c.riskNext > 0){
+    if(t.overBudget) h += '<p class="alert warn">Tu risques <b>' + money(t.risk) + '</b>, soit ' + money(t.risk - c.riskNext) + ' de plus que les ' + money(c.riskNext) + ' prévus par ton plan.' + (c.main.used > 0 ? ' Le mode Auto prendrait ' + c.main.used + ' ' + I.label + '.' : '') + '</p>';
+    else h += '<span class="limit">Dans ton budget : ' + money(c.riskNext) + ' max par trade</span>';
+  }
+  if(c.buffer > 0){
+    if(t.risk >= c.buffer - 0.5) h += '<p class="alert bad">Un seul stop à −' + money(t.risk) + ' et le compte est perdu : il ne te reste que ' + money(c.buffer) + ' de marge.</p>';
+    else if(dayLoss >= c.buffer - 0.5) h += '<p class="alert bad">Tes ' + pl(k, 'stop', 'stops') + ' du jour feraient −' + money(dayLoss) + ', plus que ta marge de ' + money(c.buffer) + '. Une mauvaise journée et le compte est perdu.</p>';
+    else if(a.dll > 0 && dayLoss >= a.dll - 0.5) h += '<p class="alert warn">Tes ' + pl(k, 'stop', 'stops') + ' du jour feraient −' + money(dayLoss) + ' : tu toucherais la limite journalière de ' + money(a.dll) + '.</p>';
+    else h += '<p class="note">Si tu prends tes ' + pl(k, 'stop', 'stops') + ' du jour : −' + money(dayLoss) + ', soit ' + pct(dayLoss / c.buffer) + ' de ta marge avant de perdre le compte (' + money(c.buffer) + ').</p>';
+  }
+  return h;
 }
 function vizHTML(a, c){
   const total = c.capMainNow;
@@ -1077,6 +1191,7 @@ function tradeOutHTML(a, c){
     dd:'Il te reste moins d’un stop avant de perdre le compte : ne trade plus ce compte comme ça.', metal:'Pas d’or chez Apex : la firm a suspendu tous les métaux (GC, MGC) depuis mars 2026.',
     trades:'Tu as pris tes ' + a.maxTrades + ' trades du jour. On reprend demain.', sl:'Ta limite de pertes du jour est atteinte. On reprend demain.',
     cap:'Aucun contrat autorisé : vérifie tes limites de contrats.'};
+  if(a.manualC && c.sl > 0) return manualTradeHTML(a, c, reasons);
   if(c.block){
     return '<div class="answer"><span class="bignum zero">0</span><span class="unit">' + I.label + '</span></div>' +
       '<p class="alert ' + (/done|Done/.test(c.block) ? 'warn' : 'bad') + '">' + reasons[c.block] + '</p>';
@@ -1084,12 +1199,12 @@ function tradeOutHTML(a, c){
   if(!(c.sl > 0)) return '<p class="note">Règle la taille de ton stop en points.</p>';
   let h = '<div class="answer"><span class="bignum' + (c.main.used === 0 ? ' zero' : '') + '">' + c.main.used + '</span><span class="unit">' + I.label + '</span><span class="answer-cap">' + (c.main.used > 1 ? 'contrats à prendre' : 'contrat à prendre') + '</span></div>';
   if(c.main.used > 0){
-    h += '<div class="trade-legs">' +
-      '<div class="leg sl"><span class="k">Ton stop</span><span class="v">' + fmtDist(a.und, c.sl, true) + '</span><span class="s">si touché : −' + money(c.main.risk) + '</span></div>' +
-      '<div class="leg tp"><span class="k">Ton objectif (TP)</span><span class="v">' + fmtDist(a.und, c.tpPts, true) + '</span><span class="s">si touché : +' + money(c.tpGain) + '</span></div></div>';
+    h += legsHTML(a, c, c.main.risk, c.tpGain);
   } else {
     h += '<p class="alert bad">Stop trop grand : même 1 ' + I.label + ' te ferait perdre ' + money(c.sl * I.pv) + ', plus que les ' + money(c.riskNext) + ' autorisés.' +
-      (c.alt.used > 0 ? ' Prends plutôt <b>' + c.alt.used + ' ' + J.label + '</b>.' : ' Réduis ton stop.') + '</p>';
+      (c.alt.used > 0 ? ' Prends plutôt <b>' + c.alt.used + ' ' + J.label + '</b>.' : ' Réduis ton stop.') + '</p>' +
+      '<p class="note">Avec 1 ' + I.label + ' : stop −' + money(c.trade.one) + ' (' + money(c.trade.one - c.riskNext) + ' de plus que prévu), TP +' + money(c.trade.tpPer) + '.</p>' +
+      '<button class="btn ghost" data-act="take-1">Voir le trade avec 1 ' + I.label + ' quand même</button>';
   }
   h += vizHTML(a, c);
   if(c.alt.used > 0 && c.main.used > 0) h += '<p class="note">En ' + (J.micro ? 'micro' : 'mini') + ' : ' + c.alt.used + ' ' + J.label + ' (−' + money(c.alt.risk) + ' si le stop est touché).</p>';
@@ -1107,6 +1222,53 @@ function tradeOutHTML(a, c){
         return '<tr' + (r.k === c.main.used ? ' class="cur"' : '') + '><td>' + r.k + '</td><td>' + (r.sl > 0 ? fmtDist(a.und, r.sl, false) : '—') + '</td><td>' + (r.sl > 0 ? fmtDist(a.und, r.sl * a.rr, false) : '—') + '</td></tr>';
       }).join('') + '</tbody></table></div><p class="note">1 tick ' + I.label + ' = ' + num(I.pv * I.tick, 2) + ' $ par contrat · 1 point = ' + num(I.pv, 2) + ' $.</p></details>';
   }
+  return h;
+}
+/* ----- Objectif en $ → ticks de TP ----- */
+function goalDefault(a, c){ return c.todayGoal > 0 ? c.todayGoal : c.remaining > 0 ? c.remaining : 1000; }
+function goalAmtOf(a, c){ return a.goalAmt > 0 ? a.goalAmt : goalDefault(a, c); }
+function goalChips(a, c){
+  const out = [];
+  if(c.todayGoal > 0) out.push({k:Math.round(c.todayGoal), t:'Objectif du jour'});
+  if(isEval(a) && c.remaining > 0) [2, 3].forEach(function(d){ out.push({k:Math.ceil(c.remaining / d - EPS), t:'Valider en ' + d + ' jours'}); });
+  if(isFinite(c.consCap) && c.consCap > 0) out.push({k:Math.floor(c.consCap + EPS), t:'Max/jour (consistance)'});
+  const seen = {};
+  return out.filter(function(o){ if(seen[o.k + o.t]) return false; seen[o.k + o.t] = 1; return true; });
+}
+function goalPanelHTML(a, c){
+  const cur0 = Math.round(goalAmtOf(a, c));
+  return '<section class="panel"><h2>Combien de ticks pour gagner…</h2>' +
+    '<div class="fields">' + field('Montant visé ($)', 'goalAmt', cur0, {full:true}) + '</div>' +
+    '<div class="chips sm">' + goalChips(a, c).map(function(o){
+      return '<button class="chipbtn" data-act="goal-set" data-k="' + o.k + '" aria-pressed="' + (o.k === cur0) + '">' + money(o.k) + '<small>' + o.t + '</small></button>';
+    }).join('') + '</div>' +
+    '<div id="o-goal" class="col">' + goalOutHTML(a, c) + '</div></section>';
+}
+function goalOutHTML(a, c){
+  const I = INSTR[c.keyMain], amt = goalAmtOf(a, c), tickUsd = I.pv * I.tick;
+  if(!(amt > 0)) return '<p class="note">Entre un montant en dollars.</p>';
+  const n = c.trade.n > 0 ? c.trade.n : 1;
+  const T = Math.ceil(amt / (n * tickUsd) - EPS);
+  const slT = c.sl > 0 ? Math.round(c.sl / I.tick) : 0;
+  const rr = slT > 0 ? T / slT : NaN;
+  let h = '<div class="answer"><span class="bignum md">' + nf(0).format(T) + '</span><span class="unit">ticks</span><span class="answer-cap">de TP avec ' + n + ' ' + I.label + '</span></div>' +
+    '<p class="answer-sub">= ' + num(T * I.tick, I.dec) + ' points · <b>+' + money(T * n * tickUsd) + '</b>' + (slT > 0 ? ' · ton stop de ' + nf(0).format(slT) + ' ticks = −' + money(slT * n * tickUsd) + ' · gain/risque <b>' + num(rr, 1) + '</b>' : '') + '</p>';
+  if(T > 1) h += '<p class="note">Ou en plusieurs trades gagnants : ' + [2, 3].map(function(k){ return k + ' × ' + nf(0).format(Math.ceil(T / k - EPS)) + ' ticks'; }).join(' · ') + '.</p>';
+  if(rr > 4) h += '<p class="alert warn">TP ' + num(rr, 1) + ' fois plus grand que ton stop : c’est un très gros mouvement à attraper en un trade. Plus réaliste : plusieurs trades, ou plus de contrats si ton risque le permet.</p>';
+  if(!isMonthly(a) && isFinite(c.consCap) && amt > c.consCap + 0.5){
+    const ph = phaseOf(a);
+    h += '<p class="alert warn">Au-dessus de <b>' + money(c.consCap) + '</b>, le maximum par jour avec ta règle de consistance (' + a.consistency + ' %) : il faut au moins <b>' + pl(c.minDays, 'jour', 'jours') + '</b> pour valider.' +
+      (ph.consOpt && a.consistency < ph.consOpt ? ' Avec l’option ' + ph.consOpt + ' % prise à l’achat : ' + pl(Math.ceil(100 / ph.consOpt - EPS), 'jour', 'jours') + ' (à régler dans Mon plan).' : '') + '</p>';
+  }
+  h += '<button class="btn ghost" data-act="tp-goal" data-t="' + T + '">Mettre mon TP à ' + nf(0).format(T) + ' ticks</button>';
+  const cap = Math.max(1, c.trade.firmSize || 1), step = I.micro ? Math.max(1, Math.round(cap / 6)) : 1, ks = [];
+  for(let k = step; k <= cap; k += step) ks.push(k);
+  if(ks[ks.length - 1] !== cap) ks.push(cap);
+  h += '<details class="more"><summary>Selon le nombre de contrats</summary><div class="tablewrap"><table><thead><tr><th>' + I.label + '</th><th>TP nécessaire</th><th>Stop actuel</th></tr></thead><tbody>' +
+    ks.map(function(k){
+      const tk = Math.ceil(amt / (k * tickUsd) - EPS);
+      return '<tr' + (k === n ? ' class="cur"' : '') + '><td>' + k + '</td><td>' + nf(0).format(tk) + ' ticks</td><td>' + (slT > 0 ? '−' + money(slT * k * tickUsd) : '—') + '</td></tr>';
+    }).join('') + '</tbody></table></div><p class="note">1 tick ' + I.label + ' = ' + num(tickUsd, 2) + ' $ par contrat.</p></details>';
   return h;
 }
 function logHTML(a){
@@ -1127,8 +1289,8 @@ function dayOutHTML(a, c){
       tile('Trades restants', c.tradesLeft, 'sur ' + a.maxTrades + ' par jour', c.tradesLeft === 0 ? 'warn' : '') +
     '</div>' +
     '<div class="actions">' +
-      '<button class="btn good" data-act="log-tp">TP touché<small>+' + money(c.TP) + '</small></button>' +
-      '<button class="btn bad" data-act="log-sl">Stop touché<small>' + money(-c.R) + '</small></button>' +
+      '<button class="btn good" data-act="log-tp">TP touché<small>+' + money(c.tpVal) + '</small></button>' +
+      '<button class="btn bad" data-act="log-sl">Stop touché<small>' + money(-c.slVal) + '</small></button>' +
       '<button class="btn" data-act="log-be">À zéro<small>0 $</small></button></div>' +
     '<div id="o-log">' + logHTML(a) + '</div>';
 }
@@ -1148,7 +1310,8 @@ function todayTabHTML(a, c){
   if(!a.configured) h += '<section class="panel setup-cta"><h2>Configure ce compte</h2><p class="lead">Dis-moi ce que tu veux faire avec ce compte, je calcule tout : risque, contrats, objectif du jour.</p><button class="btn primary big" data-act="wiz-open">Commencer (30 secondes)</button>' + voiceCtaHTML().replace('voice-open', 'voice-start') + '</section>';
   h += '<section class="status ' + c.status.cls + '" id="o-status" aria-live="polite">' + statusHTML(a, c) + '</section>';
   if(a.configured) h += '<section class="panel plan-bar"><div class="pb-text"><span class="pb-k">Ton plan</span><span class="pb-v">' + planSummary(a, c) + '</span></div><button class="btn ghost" data-act="plan-manage">Changer</button></section>';
-  h += '<section class="panel hero"><h2>Ton prochain trade</h2>' + heroSegHTML(a) + slControlHTML(a) + '<div id="o-trade" class="col">' + tradeOutHTML(a, c) + '</div></section>';
+  h += '<section class="panel hero"><h2>Ton prochain trade</h2>' + heroSegHTML(a) + contractsControlHTML(a, c) + slControlHTML(a, c) + tpControlHTML(a, c) + '<div id="o-trade" class="col">' + tradeOutHTML(a, c) + '</div></section>';
+  h += goalPanelHTML(a, c);
   h += '<section class="panel"><h2>Ta journée</h2><div id="o-day" class="col">' + dayOutHTML(a, c) + '</div>' +
     '<details class="more"><summary>Résultat différent (partiel, sortie manuelle…)</summary><div class="inline">' + field('Montant en $ (négatif si perte)', 'customPnl', '') + '<button class="btn primary" data-act="log-custom">Ajouter</button></div></details></section>';
   return h;
@@ -1197,7 +1360,10 @@ function planStepsHTML(a, c, p){
 }
 function rulesHTML(a, c){
   const P = PLANS[a.plan] || PLANS.custom, ph = phaseOf(a), f = c.firm;
-  return '<ul class="rules">' + ph.rules.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
+  const consSeg = ph.consOpt ? '<div class="field full"><label>Ta règle de consistance (choisie à l’achat)</label><div class="seg c2" role="radiogroup" aria-label="Règle de consistance">' +
+      '<button role="radio" data-act="cons" data-k="' + ph.consistency + '" aria-checked="' + (a.consistency === ph.consistency) + '">' + ph.consistency + ' % · standard<small>' + pl(Math.ceil(100 / ph.consistency - EPS), 'jour', 'jours') + ' minimum</small></button>' +
+      '<button role="radio" data-act="cons" data-k="' + ph.consOpt + '" aria-checked="' + (a.consistency === ph.consOpt) + '">' + ph.consOpt + ' % · option<small>' + pl(Math.ceil(100 / ph.consOpt - EPS), 'jour', 'jours') + ' minimum</small></button></div></div>' : '';
+  return '<ul class="rules">' + ph.rules.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' + consSeg +
     '<p class="note">Contrats autorisés maintenant : <b>' + pl(c.capMini,'mini','minis') + '</b>' + (f.next ? ' (palier suivant : ' + pl(f.next.m,'mini','minis') + ' à +' + money(f.next.p) + ' de profit)' : '') + '.</p>' +
     '<p class="note">Vérifié le ' + VERIFIED + (P.source ? ' · <a href="' + P.source + '" target="_blank" rel="noopener">source</a>' : '') + '.</p>';
 }
@@ -2004,6 +2170,11 @@ function renderOutputs(){
   const st = document.getElementById('o-status');
   if(st){ st.className = 'status ' + c.status.cls; st.innerHTML = statusHTML(a, c); }
   setHTML('o-trade', tradeOutHTML(a, c));
+  setHTML('o-sl-usd', slUsdHTML(a, c));
+  setHTML('o-tp-usd', tpUsdHTML(a, c));
+  setHTML('o-tp-mode', tpModeHTML(a, c));
+  setHTML('o-nc-note', ncNoteHTML(a, c));
+  setHTML('o-goal', goalOutHTML(a, c));
   setHTML('o-day', dayOutHTML(a, c));
   setHTML('o-progress', progressOutHTML(a, c));
   setHTML('o-scen', scenHTML(a, c));
@@ -2076,11 +2247,15 @@ function postRender(){
     prevSlots = target;
   } else prevSlots = 0;
 }
+// Garde les champs stop, TP et contrats d'accord entre eux (sans toucher celui qu'on est en train de modifier).
 function syncSL(fromId){
-  const a = cur(), v = a.sl[a.und], U = UND[a.und];
-  const num = document.getElementById('f-sl'), rng = document.getElementById('f-slr');
-  if(num && fromId !== 'f-sl') num.value = toUnit(a.und, v);
-  if(rng && fromId !== 'f-slr') rng.value = Math.min(toUnit(a.und, U.max), Math.max(toUnit(a.und, U.min), toUnit(a.und, v)));
+  const a = cur(), U = UND[a.und];
+  const set = function(id, v){ const el = document.getElementById(id); if(el && id !== fromId) el.value = v; };
+  const clampU = function(v, lo, hi){ return Math.min(toUnit(a.und, hi), Math.max(toUnit(a.und, lo), v)); };
+  const sl = toUnit(a.und, a.sl[a.und]), tp = toUnit(a.und, tpPtsOf(a));
+  set('f-sl', sl); set('f-slr', clampU(sl, U.min, U.max));
+  set('f-tp', round2(tp)); set('f-tpr', clampU(tp, U.min, U.max * 3));
+  set('f-nc', Math.max(1, Math.round(a.nC || 1)));
 }
 let toastTimer = null;
 function toast(msg){
@@ -2177,7 +2352,7 @@ function celebrateValidation(){
 }
 
 /* ---------- Interactions ---------- */
-const INT_FIELDS = {nR:1, nSL:1, persoCap:1, maxTrades:1, maxSLDay:1, daysGoal:1, minDays:1, firmMax:1, tradesToday:1, microRatio:1, tradingDays:1, tpPerDay:1};
+const INT_FIELDS = {nC:1, nR:1, nSL:1, persoCap:1, maxTrades:1, maxSLDay:1, daysGoal:1, minDays:1, firmMax:1, tradesToday:1, microRatio:1, tradingDays:1, tpPerDay:1};
 function resetForPhase(a){
   applyPhase(a);
   a.balance = a.size; a.threshold = a.size - a.dd; a.pnlToday = 0; a.tradesToday = 0; a.log = [];
@@ -2199,8 +2374,11 @@ function onFieldChange(el){
   let v = parseNum(el.value);
   if(!isFinite(v)) return;
   if(INT_FIELDS[f]) v = Math.max(0, Math.round(v));
-  if((f === 'rr' || f === 'sl') && v <= 0) return;
-  if(f === 'sl'){ a.sl[a.und] = Math.round(fromUnit(a.und, v) * 10000) / 10000; syncSL(el.id); } else a[f] = v;
+  if((f === 'rr' || f === 'sl' || f === 'tp' || f === 'nC') && v <= 0) return;
+  if(f === 'sl'){ a.sl[a.und] = Math.round(fromUnit(a.und, v) * 10000) / 10000; syncSL(el.id); }
+  else if(f === 'tp'){ if(!a.tp) a.tp = {}; a.tp[a.und] = Math.round(fromUnit(a.und, v) * 10000) / 10000; a.tpFree = true; syncSL(el.id); }
+  else if(f === 'nC'){ a.nC = Math.min(ncMax(a), Math.max(1, v)); if(a.nC !== v) syncSL(''); }
+  else a[f] = v;
   renderOutputs();
   touch();
 }
@@ -2258,6 +2436,31 @@ function handleAct(btn){
       const nv = Math.round(((a.sl[a.und] || U.defSL) + (act === 'sl-inc' ? U.bstep : -U.bstep)) * 100) / 100;
       a.sl[a.und] = Math.max(U.rstep, nv); syncSL(''); renderOutputs(); touch(); buzz(5); return;
     }
+    case 'tp-dec': case 'tp-inc': {
+      const U = UND[a.und];
+      const nv = Math.round((tpPtsOf(a) + (act === 'tp-inc' ? U.bstep : -U.bstep)) * 100) / 100;
+      if(!a.tp) a.tp = {};
+      a.tp[a.und] = Math.max(U.rstep, nv); a.tpFree = true; syncSL(''); renderOutputs(); touch(); buzz(5); return;
+    }
+    case 'tp-rr': a.tpFree = false; syncSL(''); renderOutputs(); touch(); toast('TP remis à ' + num(a.rr, 2) + ' × le stop'); return;
+    case 'nc-dec': case 'nc-inc':
+      a.nC = Math.min(ncMax(a), Math.max(1, Math.round(a.nC || 1) + (act === 'nc-inc' ? 1 : -1)));
+      syncSL(''); renderOutputs(); touch(); buzz(5); return;
+    case 'cmode': {
+      const man = btn.dataset.k === 'manual';
+      if(man === !!a.manualC) return;
+      a.manualC = man;
+      if(man) a.nC = Math.min(ncMax(a), Math.max(1, c.main.used || Math.round(a.nC || 1)));
+      break;
+    }
+    case 'take-1': a.manualC = true; a.nC = 1; toast('Mode « Je choisis » : 1 contrat'); break;
+    case 'goal-set': a.goalAmt = +btn.dataset.k; break;
+    case 'tp-goal': {
+      if(!a.tp) a.tp = {};
+      a.tp[a.und] = Math.round(+btn.dataset.t * tickOf(a.und) * 10000) / 10000; a.tpFree = true;
+      toast('TP réglé à ' + btn.dataset.t + ' ticks'); break;
+    }
+    case 'cons': a.consistency = +btn.dataset.k; toast('Consistance : ' + a.consistency + ' %'); break;
     case 'set-win': a.winRate = +btn.dataset.k / 10; if(!a.winRR) a.winRR = a.rr; break;
     case 'use-plan':
       a.method = 'fixed'; a.fixedR = +btn.dataset.r; a.rr = +btn.dataset.rr; a.maxTrades = +btn.dataset.n; a.dayTP = +btn.dataset.k; a.maxSLDay = Math.max(1, +btn.dataset.n);
@@ -2267,9 +2470,15 @@ function handleAct(btn){
     case 'set-days': a.daysGoal = +btn.dataset.k; toast('Plan recalculé sur ' + pl(a.daysGoal,'jour','jours')); break;
     case 'set-month': a.monthlyGoal = +btn.dataset.k; toast('Objectif du mois : ' + money(a.monthlyGoal)); break;
     case 'und': a.und = btn.dataset.k; break;
-    case 'size': a.useMicro = btn.dataset.k === 'micro'; break;
-    case 'log-tp': if(c.TP > 0){ addTrade(a, 'TP', c.TP); effect = 'tp'; } break;
-    case 'log-sl': if(c.R > 0){ addTrade(a, 'SL', -c.R); effect = 'sl'; } break;
+    case 'size': {
+      const micro = btn.dataset.k === 'micro';
+      // En mode « Je choisis », on garde la même exposition : 1 mini = 10 micros
+      if(a.manualC && micro !== !!a.useMicro){ const r = a.microRatio || 10; a.nC = Math.max(1, micro ? Math.round(a.nC || 1) * r : Math.round((a.nC || 1) / r)); }
+      a.useMicro = micro; a.nC = Math.min(ncMax(a), Math.max(1, Math.round(a.nC || 1)));
+      break;
+    }
+    case 'log-tp': if(c.tpVal > 0){ addTrade(a, 'TP', c.tpVal); effect = 'tp'; } break;
+    case 'log-sl': if(c.slVal > 0){ addTrade(a, 'SL', -c.slVal); effect = 'sl'; } break;
     case 'log-be': addTrade(a, 'BE', 0); effect = 'be'; break;
     case 'log-custom': {
       const inp = document.getElementById('f-customPnl');
@@ -2345,7 +2554,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '13';
+const APP_VERSION = '14';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
