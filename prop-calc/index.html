@@ -905,7 +905,7 @@ function makeAccount(planKey){
   const a = {id:uid(), plan:planKey, phase:'eval', name:P.short};
   applyPhase(a);
   Object.keys(PERSO).forEach(function(k){ a[k] = PERSO[k]; });
-  a.sl = defaultSL(); a.tp = {}; a.mig14 = true;
+  a.sl = defaultSL(); a.tp = {}; a.mig14 = true; a.mig17 = true;
   a.balance = a.size; a.threshold = a.size - a.dd; a.pnlToday = 0; a.tradesToday = 0; a.log = []; a.day = todayStr();
   a.month = a.day.slice(0, 7); a.monthPnl = 0; a.monthDays = 0;
   return a;
@@ -966,6 +966,17 @@ function normalize(){
       if(a.plan === 'lucid50flex' && a.phase === 'eval'){
         a.daysGoal = 6; a.rr = 1.5; a.tpFree = false; a.goalAmt = 0; a.manualC = false;
         migNote = 'Lucid Flex : 6 jours, TP à 1,5R';
+      }
+    }
+    // Une seule fois (v17) : Lucid Flex en évaluation, objectif 1 000 $/jour sur 3 jours.
+    // 2 TP de 500 $ par jour (2 NQ, TP 50 ticks), 3 trades max, on coupe après 2 stops.
+    if(!a.mig17){
+      a.mig17 = true;
+      if(a.plan === 'lucid50flex' && a.phase === 'eval'){
+        a.daysGoal = 3; a.maxTrades = 3; a.maxSLDay = 2; a.manualC = false; a.goalAmt = 0;
+        if(!a.tp || typeof a.tp !== 'object') a.tp = {};
+        a.tp.NQ = 12.5; a.tpFree = true;
+        migNote = 'Lucid Flex : 3 jours, TP 50 ticks, 2 stops max';
       }
     }
   });
@@ -2607,7 +2618,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // Mise à jour automatique : compare la version en ligne et recharge l'appli si elle a changé.
-const APP_VERSION = '16';
+const APP_VERSION = '17';
 function checkUpdate(){
   fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.v || d.v === APP_VERSION) return;
